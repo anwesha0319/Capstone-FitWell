@@ -1,8 +1,8 @@
-# 🏋️ FitWell - AI-Powered Fitness & Health Tracking App
+# FitWell - AI-Powered Fitness & Health Tracking App
 
 A comprehensive React Native mobile application with Django backend that helps users track their fitness journey, monitor health metrics, and receive AI-powered personalized recommendations.
 
-## ✨ Features
+## Features
 
 ### 📊 Health Tracking
 - **Activity Monitoring**: Track daily steps, calories burned, distance, and active minutes
