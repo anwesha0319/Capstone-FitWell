@@ -55,7 +55,7 @@ const GlassCard = ({ children, style, variant = 'primary', elevation = 'card' })
         ]}
         blurType={isDark ? 'dark' : 'light'}
         blurAmount={colors.blurLight}
-        reducedTransparencyFallbackColor={isDark ? 'rgba(30, 30, 50, 0.85)' : 'rgba(255, 255, 255, 0.85)'}
+        reducedTransparencyFallbackColor={isDark ? 'rgba(60, 50, 90, 0.90)' : 'rgba(255, 255, 255, 0.85)'}
       >
         {children}
       </BlurView>
@@ -73,7 +73,7 @@ const GlassCard = ({ children, style, variant = 'primary', elevation = 'card' })
       ]}
       blurType={isDark ? 'dark' : 'light'}
       blurAmount={colors.blurAmount}
-      reducedTransparencyFallbackColor={isDark ? 'rgba(30, 30, 50, 0.85)' : 'rgba(255, 255, 255, 0.85)'}
+      reducedTransparencyFallbackColor={isDark ? 'rgba(60, 50, 90, 0.90)' : 'rgba(255, 255, 255, 0.85)'}
     >
       {children}
     </BlurView>
