@@ -43,19 +43,34 @@ const GlassCard = ({ children, style, variant = 'primary', elevation = 'card' })
   const variantStyle = variants[variant] || variants.primary;
   const elevationStyle = elevations[elevation] || elevations.card;
 
-  // For Android or when blur is not available, use semi-transparent background
-  if (Platform.OS === 'android' || Platform.Version < 31) {
+  // For Android, use a more opaque background since BlurView might not work
+  if (Platform.OS === 'android') {
+    const androidVariants = {
+      primary: {
+        ...variantStyle,
+        backgroundColor: isDark ? 'rgba(60, 50, 90, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+      },
+      nested: {
+        ...variantStyle,
+        backgroundColor: isDark ? 'rgba(60, 50, 90, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+      },
+      strong: {
+        ...variantStyle,
+        backgroundColor: isDark ? 'rgba(60, 50, 90, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+      },
+    };
+    
     return (
       <BlurView
         style={[
           styles.card,
-          variantStyle,
+          androidVariants[variant] || androidVariants.primary,
           elevationStyle,
           style,
         ]}
         blurType={isDark ? 'dark' : 'light'}
-        blurAmount={colors.blurLight}
-        reducedTransparencyFallbackColor={isDark ? 'rgba(60, 50, 90, 0.90)' : 'rgba(255, 255, 255, 0.85)'}
+        blurAmount={10}
+        reducedTransparencyFallbackColor={isDark ? 'rgba(60, 50, 90, 0.95)' : 'rgba(255, 255, 255, 0.95)'}
       >
         {children}
       </BlurView>
