@@ -8,6 +8,7 @@ import {
   TextInput,
   Alert,
   Modal,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'react-native-linear-gradient';
@@ -38,11 +39,11 @@ const MyProfileScreen = () => {
     { name: 'tennis', label: 'Tennis', bg: '#FFCA28' },
     { name: 'golf', label: 'Golf', bg: '#66BB6A' },
     { name: 'hiking', label: 'Hiking', bg: '#8D6E63' },
-    { name: 'boxing', label: 'Boxing', bg: '#EC407A' },
+    { name: 'boxing-glove', label: 'Boxing', bg: '#EC407A' },
     { name: 'karate', label: 'Karate', bg: '#7C4DFF' },
     { name: 'weight-lifter', label: 'Lifter', bg: '#FF5722' },
     { name: 'meditation', label: 'Zen', bg: '#9C27B0' },
-    { name: 'heart-pulse', label: 'Cardio', bg: '#F44336' },
+    { name: 'fitwell', label: 'FitWell', bg: '#8B5CF6', isLogo: true },
   ];
 
   useEffect(() => {
@@ -137,7 +138,15 @@ const MyProfileScreen = () => {
         <View style={[styles.profileHeader, { backgroundColor: 'transparent', borderColor: colors.border }]}>
           <TouchableOpacity onPress={() => setShowAvatarModal(true)} style={styles.avatarContainer}>
             <View style={[styles.avatarLarge, { backgroundColor: avatars.find(a => a.name === selectedAvatar)?.bg || colors.accent, borderColor: colors.border }]}>
-              <Icon name={selectedAvatar} size={60} color="#FFFFFF" />
+              {selectedAvatar === 'fitwell' ? (
+                <Image 
+                  source={require('../../assets/images/fitwell_logo.png')}
+                  style={{ width: 60, height: 60 }}
+                  resizeMode="contain"
+                />
+              ) : (
+                <Icon name={selectedAvatar} size={60} color="#FFFFFF" />
+              )}
             </View>
             <View style={[styles.editAvatarBadge, { backgroundColor: colors.accent }]}>
               <Icon name="pencil" size={14} color="#FFFFFF" />
@@ -162,7 +171,11 @@ const MyProfileScreen = () => {
           <View style={styles.modalOverlay}>
             <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
               <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Choose Avatar</Text>
-              <ScrollView style={styles.avatarScrollView} showsVerticalScrollIndicator={false}>
+              <ScrollView 
+                style={styles.avatarScrollView} 
+                showsVerticalScrollIndicator={true}
+                contentContainerStyle={styles.avatarScrollContent}
+              >
                 <View style={styles.avatarGrid}>
                   {avatars.map((avatar) => (
                     <TouchableOpacity
@@ -177,7 +190,15 @@ const MyProfileScreen = () => {
                       ]}
                       onPress={() => handleAvatarSelect(avatar.name)}
                     >
-                      <Icon name={avatar.name} size={40} color="#FFFFFF" />
+                      {avatar.isLogo ? (
+                        <Image 
+                          source={require('../../assets/images/fitwell_logo.png')}
+                          style={{ width: 40, height: 40 }}
+                          resizeMode="contain"
+                        />
+                      ) : (
+                        <Icon name={avatar.name} size={40} color="#FFFFFF" />
+                      )}
                       <Text style={[styles.avatarLabel, { color: '#FFFFFF' }]}>{avatar.label}</Text>
                     </TouchableOpacity>
                   ))}
@@ -288,8 +309,8 @@ const MyProfileScreen = () => {
           </View>
 
           <View style={styles.goalRow}>
-            <View style={[styles.goalIcon, { backgroundColor: colors.purple + '30' }]}>
-              <Icon name="sleep" size={24} color={colors.purple} />
+            <View style={[styles.goalIcon, { backgroundColor: '#7C4DFF' + '30' }]}>
+              <Icon name="moon-waning-crescent" size={24} color="#7C4DFF" />
             </View>
             <View style={styles.goalContent}>
               <Text style={[styles.goalLabel, { color: colors.textSecondary }]}>Bedtime Schedule</Text>
@@ -298,13 +319,13 @@ const MyProfileScreen = () => {
                   style={[styles.timeSelector, { backgroundColor: colors.cardGlass, borderColor: colors.border }]}
                   onPress={() => setShowBedtimeModal(true)}
                 >
-                  <Icon name="clock-outline" size={20} color={colors.accent} />
+                  <Icon name="moon-waning-crescent" size={20} color="#7C4DFF" />
                   <Text style={[styles.timeSelectorText, { color: colors.textPrimary }]}>{bedtime}</Text>
                   <Icon name="chevron-down" size={20} color={colors.textSecondary} />
                 </TouchableOpacity>
               ) : (
                 <View style={styles.bedtimeDisplay}>
-                  <Icon name="clock-outline" size={18} color={colors.purple} />
+                  <Icon name="moon-waning-crescent" size={18} color="#7C4DFF" />
                   <Text style={[styles.goalValue, { color: colors.textPrimary, marginLeft: 8 }]}>{bedtime}</Text>
                 </View>
               )}
@@ -661,6 +682,10 @@ const styles = StyleSheet.create({
   },
   avatarScrollView: {
     maxHeight: 400,
+    flexGrow: 0,
+  },
+  avatarScrollContent: {
+    paddingBottom: 10,
   },
   avatarGrid: {
     flexDirection: 'row',

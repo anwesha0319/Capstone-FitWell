@@ -28,26 +28,38 @@ def recommended_calories(age, gender, height, weight, activity):
 
 # ---------------- NUTRITION FEEDBACK FOR AI ---------------- #
 def get_feedback(user):
+    """
+    Get detailed feedback about user's eating patterns
+    Returns nutrition data AND skipped meals for AI learning
+    """
     last_week = now().date() - timedelta(days=7)
     meals = MealPlan.objects.filter(user=user, date__gte=last_week)
 
     protein = carbs = fat = calories = 0
+    skipped_meals = []
+    eaten_meals = []
 
     for meal in meals:
         for item in meal.items.all():
             tracking = MealItemTracking.objects.filter(meal_item=item).order_by('-timestamp').first()
-            if tracking and tracking.status == "eaten":
-                ratio = tracking.quantity_ratio
-                calories += item.calories * ratio
-                protein += item.protein * ratio
-                carbs += item.carbs * ratio
-                fat += item.fat * ratio
+            if tracking:
+                if tracking.status == "eaten":
+                    ratio = tracking.quantity_ratio
+                    calories += item.calories * ratio
+                    protein += item.protein * ratio
+                    carbs += item.carbs * ratio
+                    fat += item.fat * ratio
+                    eaten_meals.append(item.food_name)
+                elif tracking.status == "skipped":
+                    skipped_meals.append(item.food_name)
 
     return {
         "calories": round(calories, 1),
         "protein": round(protein, 1),
         "carbs": round(carbs, 1),
         "fat": round(fat, 1),
+        "skipped_meals": skipped_meals,
+        "eaten_meals": eaten_meals,
     }
 
 

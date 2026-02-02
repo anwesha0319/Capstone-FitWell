@@ -117,7 +117,7 @@ const SleepTab = () => {
       )}
 
       {/* Daily Sleep Goal Container */}
-      <View style={[styles.goalCard, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+      <View style={[styles.goalCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={styles.goalHeader}>
           <View>
             <Text style={[styles.goalLabel, { color: colors.textSecondary }]}>Daily Sleep Goal</Text>
@@ -144,7 +144,7 @@ const SleepTab = () => {
       </View>
 
       {/* Sleep Quality Card */}
-      <View style={[styles.qualityCard, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+      <View style={[styles.qualityCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={styles.qualityHeader}>
           <Icon name="star-four-points" size={24} color="#FFD700" />
           <Text style={[styles.qualityText, { color: colors.textPrimary }]}>{sleepQuality}</Text>
@@ -195,9 +195,11 @@ const SleepTab = () => {
       </View>
 
       {/* Personal Insights */}
-      <View style={[styles.card, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={styles.insightHeader}>
-          <Icon name="head-lightbulb" size={24} color={colors.accent} />
+          <View style={[styles.iconCircle, { backgroundColor: colors.accent + '20' }]}>
+            <Icon name="head-lightbulb" size={24} color={colors.accent} />
+          </View>
           <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Personal insights</Text>
         </View>
         <Text style={[styles.insightText, { color: colors.textSecondary }]}>
@@ -206,7 +208,7 @@ const SleepTab = () => {
       </View>
 
       {/* Weekly Sleep Chart */}
-      <View style={[styles.card, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={styles.chartHeaderRow}>
           <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Sleep Pattern</Text>
           <Text style={[styles.timePeriodLabel, { color: colors.textSecondary }]}>
@@ -238,35 +240,39 @@ const SleepTab = () => {
         {/* Y-axis label */}
         <Text style={[styles.yAxisLabel, { color: colors.textSecondary }]}>Hours</Text>
 
-        <View style={styles.chartWrapper}>
-          <View style={styles.timeLabels}>
-            <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>9h</Text>
-            <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>6h</Text>
-            <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>3h</Text>
-            <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>0h</Text>
-          </View>
-          <View style={styles.chartContainer}>
-              {computedWeekly && computedWeekly.length > 0 ? computedWeekly.map((day, index) => (
-              <View key={index} style={styles.barContainer}>
-                <View style={styles.barStack}>
-                  <View style={[styles.barSegment, { height: `${(day.deep / 9) * 100}%`, backgroundColor: '#9C27B0' }]} />
-                  <View style={[styles.barSegment, { height: `${(day.light / 9) * 100}%`, backgroundColor: '#CE93D8' }]} />
-                  <View style={[styles.barSegment, { height: `${(day.rem / 9) * 100}%`, backgroundColor: '#7C4DFF' }]} />
-                  <View style={[styles.barSegment, { height: `${(day.awake / 9) * 100}%`, backgroundColor: '#B0BEC5' }]} />
+        {computedWeekly && computedWeekly.length > 0 && computedWeekly.some(d => d.deep > 0 || d.light > 0 || d.rem > 0) ? (
+          <View style={styles.chartWrapper}>
+            <View style={styles.timeLabels}>
+              <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>9h</Text>
+              <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>6h</Text>
+              <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>3h</Text>
+              <Text style={[styles.timeLabel, { color: colors.textSecondary }]}>0h</Text>
+            </View>
+            <View style={styles.chartContainer}>
+              {computedWeekly.map((day, index) => (
+                <View key={index} style={styles.barContainer}>
+                  <View style={styles.barStack}>
+                    <View style={[styles.barSegment, { height: `${(day.deep / 9) * 100}%`, backgroundColor: '#9C27B0' }]} />
+                    <View style={[styles.barSegment, { height: `${(day.light / 9) * 100}%`, backgroundColor: '#CE93D8' }]} />
+                    <View style={[styles.barSegment, { height: `${(day.rem / 9) * 100}%`, backgroundColor: '#7C4DFF' }]} />
+                    <View style={[styles.barSegment, { height: `${(day.awake / 9) * 100}%`, backgroundColor: '#B0BEC5' }]} />
+                  </View>
+                  <Text style={[styles.dayLabel, { color: colors.textSecondary }]}>{day.day}</Text>
                 </View>
-                <Text style={[styles.dayLabel, { color: colors.textSecondary }]}>{day.day}</Text>
-              </View>
-              )) : (
-                <View style={{ paddingVertical: 24 }}>
-                  <Text style={{ color: colors.textTertiary }}>No sleep history available. Connect Health Connect or log sleep to populate this chart.</Text>
-                </View>
-              )}
+              ))}
+            </View>
           </View>
-        </View>
+        ) : (
+          <View style={[styles.noDataBox, { backgroundColor: colors.info + '10', borderColor: colors.info, marginTop: 16 }]}>
+            <Icon name="chart-line-variant" size={48} color={colors.textTertiary} />
+            <Text style={[styles.noDataText, { color: colors.textSecondary }]}>No sleep data available yet</Text>
+            <Text style={[styles.noDataSubtext, { color: colors.textTertiary }]}>Connect Health Connect to sync your sleep data automatically</Text>
+          </View>
+        )}
       </View>
 
       {/* Sleep Stages Legend */}
-      <View style={[styles.card, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Sleep Stages</Text>
         <View style={styles.legendGrid}>
           {sleepStages.map((stage, index) => (
@@ -288,15 +294,10 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 100 },
   sectionTitle: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
   goalCard: { 
-    padding: 20, 
+    padding: 24, 
     borderRadius: 20, 
-    marginBottom: 16, 
+    marginBottom: 20, 
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 6,
   },
   goalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   goalLabel: { fontSize: 14, marginBottom: 6 },
@@ -313,14 +314,9 @@ const styles = StyleSheet.create({
   qualityCard: { 
     padding: 24, 
     borderRadius: 20, 
-    marginBottom: 16, 
+    marginBottom: 20, 
     borderWidth: 1, 
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
   },
   qualityHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 8 },
   qualityText: { fontSize: 32, fontWeight: 'bold' },
@@ -344,17 +340,13 @@ const styles = StyleSheet.create({
   tipTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 4 },
   tipText: { fontSize: 13, lineHeight: 18 },
   card: { 
-    padding: 20, 
+    padding: 24, 
     borderRadius: 20, 
-    marginBottom: 16, 
+    marginBottom: 20, 
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
   },
   insightHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
+  iconCircle: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
   cardTitle: { fontSize: 18, fontWeight: 'bold' },
   chartHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   timePeriodLabel: { fontSize: 13, fontWeight: '600' },
@@ -372,6 +364,22 @@ const styles = StyleSheet.create({
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 8, width: '45%' },
   legendDot: { width: 12, height: 12, borderRadius: 6 },
   legendText: { fontSize: 13 },
+  noDataBox: { 
+    padding: 24, 
+    borderRadius: 16, 
+    borderWidth: 1, 
+    alignItems: 'center', 
+    gap: 12 
+  },
+  noDataText: { 
+    fontSize: 16, 
+    fontWeight: '600', 
+    textAlign: 'center' 
+  },
+  noDataSubtext: { 
+    fontSize: 13, 
+    textAlign: 'center' 
+  },
 });
 
 export default SleepTab;

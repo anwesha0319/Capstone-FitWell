@@ -10,13 +10,24 @@ const { width } = Dimensions.get('window');
 
 const ActivityTab = ({ navigation }) => {
   const { colors, isDark } = useTheme();
-  const [timeFilter, setTimeFilter] = useState('Day');
+  const [timeFilter, setTimeFilter] = useState('Weekly');
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [todaySteps, setTodaySteps] = useState(0);
   const [stepsGoal, setStepsGoal] = useState(10000);
   const [healthRealtime, setHealthRealtime] = useState(null);
   const [weeklyData, setWeeklyData] = useState([]);
   const [dataError, setDataError] = useState(null);
+
+  // Icon colors - darker for light mode
+  const getIconColor = (lightColor, darkColor) => isDark ? darkColor : lightColor;
+  
+  const iconColors = {
+    fire: getIconColor('#E64A19', '#FF7043'),
+    distance: getIconColor('#01579B', '#42A5F5'),
+    clock: getIconColor('#2E7D32', '#66BB6A'),
+    workout: getIconColor('#01579B', '#42A5F5'),
+    marathon: getIconColor('#6A1B9A', '#AB47BC'),
+  };
 
   useEffect(() => { loadData(); }, []);
 
@@ -53,56 +64,10 @@ const ActivityTab = ({ navigation }) => {
   const distance = healthRealtime?.distance || 0;
   const duration = '0m';
 
-  // Activity categories with gradient colors - REDUCED TO 3
-  const activityCategories = [
-    { name: 'Walking', icon: 'walk', calories: 180, duration: '45min', color: '#4CAF50', gradient: ['#66BB6A', '#4CAF50'] },
-    { name: 'Jogging', icon: 'run', calories: 320, duration: '30min', color: '#FF7043', gradient: ['#FF8A65', '#FF7043'] },
-    { name: 'Cycling', icon: 'bike', calories: 280, duration: '40min', color: '#42A5F5', gradient: ['#64B5F6', '#42A5F5'] },
-  ];
+  // Activity categories - only show if there's actual data
+  const activityCategories = [];
 
-  // Generate weekly data based on time filter
-  const getActivityData = () => {
-    switch (timeFilter) {
-      case 'Day':
-        return [
-          { day: '00', steps: 0 },
-          { day: '04', steps: 50 },
-          { day: '08', steps: 2500 },
-          { day: '12', steps: 5200 },
-          { day: '16', steps: 7100 },
-          { day: '20', steps: 8365 },
-        ];
-      case 'Week':
-        return [
-          { day: 'S', steps: 7200 },
-          { day: 'M', steps: 8500 },
-          { day: 'T', steps: 6800 },
-          { day: 'W', steps: 9200 },
-          { day: 'T', steps: 7500 },
-          { day: 'F', steps: 10500 },
-          { day: 'S', steps: 8365 },
-        ];
-      case 'Month':
-        return [
-          { day: 'W1', steps: 7800 },
-          { day: 'W2', steps: 8200 },
-          { day: 'W3', steps: 9100 },
-          { day: 'W4', steps: 8500 },
-        ];
-      default:
-        return [
-          { day: 'S', steps: 7200 },
-          { day: 'M', steps: 8500 },
-          { day: 'T', steps: 6800 },
-          { day: 'W', steps: 9200 },
-          { day: 'T', steps: 7500 },
-          { day: 'F', steps: 10500 },
-          { day: 'S', steps: 8365 },
-        ];
-    }
-  };
-
-  const computedWeekly = weeklyData.length > 0 ? weeklyData : getActivityData();
+  const computedWeekly = weeklyData;
 
   const stepsProgress = todaySteps / stepsGoal;
   const caloriesProgress = caloriesBurned / caloriesTarget;
@@ -117,43 +82,52 @@ const ActivityTab = ({ navigation }) => {
       )}
 
       {/* Steps Circle Progress */}
-      <View style={[styles.circleCard, { backgroundColor: 'transparent', borderColor: colors.border }]}>
-        <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>Today Steps</Text>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Today's Steps</Text>
         <View style={styles.circleContainer}>
           <View style={[styles.progressCircle, { borderColor: '#4CAF50' }]}>
             <Text style={[styles.stepsValue, { color: colors.textPrimary }]}>{todaySteps}</Text>
-            <Text style={[styles.stepsGoal, { color: colors.textSecondary }]}>{stepsGoal} Steps</Text>
+            <Text style={[styles.stepsGoal, { color: colors.textSecondary }]}>of {stepsGoal}</Text>
           </View>
         </View>
         
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Icon name="fire" size={20} color="#FF7043" />
-            <Text style={[styles.statValue, { color: colors.textPrimary }]}>{caloriesBurned} Kcal</Text>
+            <View style={[styles.iconCircle, { backgroundColor: iconColors.fire + '20' }]}>
+              <Icon name="fire" size={28} color={iconColors.fire} />
+            </View>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Calories</Text>
+            <Text style={[styles.statValue, { color: colors.textPrimary }]}>{caloriesBurned}</Text>
           </View>
           <View style={styles.statItem}>
-            <Icon name="map-marker-distance" size={20} color="#42A5F5" />
-            <Text style={[styles.statValue, { color: colors.textPrimary }]}>{distance} Km</Text>
+            <View style={[styles.iconCircle, { backgroundColor: iconColors.distance + '20' }]}>
+              <Icon name="map-marker-distance" size={28} color={iconColors.distance} />
+            </View>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Distance</Text>
+            <Text style={[styles.statValue, { color: colors.textPrimary }]}>{distance} km</Text>
           </View>
           <View style={styles.statItem}>
-            <Icon name="clock-outline" size={20} color="#4CAF50" />
+            <View style={[styles.iconCircle, { backgroundColor: iconColors.clock + '20' }]}>
+              <Icon name="clock-outline" size={28} color={iconColors.clock} />
+            </View>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Duration</Text>
             <Text style={[styles.statValue, { color: colors.textPrimary }]}>{duration}</Text>
           </View>
         </View>
       </View>
 
       {/* Weekly Steps Chart */}
-      <View style={[styles.card, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={styles.chartHeaderRow}>
           <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Progress</Text>
           <Text style={[styles.timePeriodLabel, { color: colors.textSecondary }]}>
-            {timeFilter === 'Day' ? 'Today' : timeFilter === 'Week' ? 'This Week' : 'This Month'}
+            {timeFilter === 'Weekly' ? 'This Week' : timeFilter === 'Monthly' ? 'This Month' : 'This Year'}
           </Text>
         </View>
         
         {/* Time Filter - Moved above chart */}
         <View style={styles.filterContainerInCard}>
-          {['Day', 'Week', 'Month'].map((filter) => (
+          {['Weekly', 'Monthly', 'Yearly'].map((filter) => (
             <TouchableOpacity
               key={filter}
               style={[
@@ -172,18 +146,20 @@ const ActivityTab = ({ navigation }) => {
           ))}
         </View>
 
-        {weeklyData && weeklyData.length > 0 ? (
+        {computedWeekly && computedWeekly.length > 0 ? (
           <>
             {/* Y-axis label */}
-            <Text style={[styles.yAxisLabel, { color: colors.textSecondary }]}>Steps</Text>
+            <Text style={[styles.yAxisLabel, { color: colors.textSecondary }]}>Steps (count)</Text>
 
             <LineChart
               data={{
-                labels: weeklyData.map(d => d.day),
-                datasets: [{ data: weeklyData.map(d => d.steps), color: () => '#7C4DFF' }]
+                labels: computedWeekly.map(d => d.day),
+                datasets: [{ data: computedWeekly.map(d => d.steps), color: () => '#7C4DFF' }]
               }}
               width={width - 80}
               height={200}
+              yAxisSuffix=""
+              yAxisLabel=""
               chartConfig={{
                 backgroundColor: isDark ? '#0F2027' : '#FFFFFF',
                 backgroundGradientFrom: isDark ? '#0F2027' : '#FFFFFF',
@@ -206,6 +182,10 @@ const ActivityTab = ({ navigation }) => {
               bezier
               style={{ marginVertical: 8, borderRadius: 16 }}
             />
+            {/* X-axis label */}
+            <Text style={[styles.xAxisLabel, { color: colors.textSecondary }]}>
+              {timeFilter === 'Weekly' ? 'Days of Week' : timeFilter === 'Monthly' ? 'Weeks of Month' : 'Months of Year'}
+            </Text>
           </>
         ) : (
           <View style={[styles.noDataBox, { backgroundColor: colors.info + '10', borderColor: colors.info }]}>
@@ -217,33 +197,37 @@ const ActivityTab = ({ navigation }) => {
       </View>
 
       {/* Activity Categories */}
-      <View style={styles.categoriesHeader}>
-        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Activity Categories</Text>
-        <TouchableOpacity
-          style={[styles.addButton, { backgroundColor: '#7C4DFF' }]}
-          onPress={() => setShowAddActivity(true)}
-        >
-          <Icon name="plus" size={20} color="#FFF" />
-          <Text style={styles.addButtonText}>Add Activity</Text>
-        </TouchableOpacity>
-      </View>
+      {activityCategories.length > 0 && (
+        <>
+          <View style={styles.categoriesHeader}>
+            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Activity Categories</Text>
+            <TouchableOpacity
+              style={[styles.addButton, { backgroundColor: '#7C4DFF' }]}
+              onPress={() => setShowAddActivity(true)}
+            >
+              <Icon name="plus" size={20} color="#FFF" />
+              <Text style={styles.addButtonText}>Add Activity</Text>
+            </TouchableOpacity>
+          </View>
 
-      <View style={styles.categoriesGrid}>
-        {activityCategories.map((activity, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[styles.categoryCard, { backgroundColor: isDark ? activity.color + '15' : activity.color + '20', borderColor: activity.color }]}
-          >
-            <Icon name={activity.icon} size={40} color={activity.color} style={{ marginBottom: 12 }} />
-            <Text style={[styles.categoryName, { color: colors.textPrimary }]}>{activity.name}</Text>
-            <Text style={[styles.categoryCalories, { color: isDark ? activity.color : colors.textPrimary }]}>{activity.calories} cal</Text>
-            <Text style={[styles.categoryDuration, { color: colors.textSecondary }]}>{activity.duration}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+          <View style={styles.categoriesGrid}>
+            {activityCategories.map((activity, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[styles.categoryCard, { backgroundColor: isDark ? activity.color + '15' : activity.color + '20', borderColor: activity.color }]}
+              >
+                <Icon name={activity.icon} size={40} color={activity.color} style={{ marginBottom: 12 }} />
+                <Text style={[styles.categoryName, { color: colors.textPrimary }]}>{activity.name}</Text>
+                <Text style={[styles.categoryCalories, { color: isDark ? activity.color : colors.textPrimary }]}>{activity.calories} cal</Text>
+                <Text style={[styles.categoryDuration, { color: colors.textSecondary }]}>{activity.duration}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </>
+      )}
 
       {/* Progress Bars */}
-      <View style={[styles.card, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Daily Progress</Text>
         
         <View style={styles.progressItem}>
@@ -284,32 +268,36 @@ const ActivityTab = ({ navigation }) => {
           
           <TouchableOpacity
             style={[styles.aiPlanButton, { 
-              backgroundColor: isDark ? '#42A5F5' + '20' : '#42A5F5' + '15', 
-              borderColor: '#42A5F5' 
+              backgroundColor: isDark ? iconColors.workout + '20' : iconColors.workout + '15', 
+              borderColor: iconColors.workout 
             }]}
             onPress={() => navigation.navigate('WorkoutPlan')}
           >
-            <Icon name="dumbbell" size={36} color="#42A5F5" />
+            <View style={[styles.iconCircle, { backgroundColor: iconColors.workout + '25' }]}>
+              <Icon name="dumbbell" size={32} color={iconColors.workout} />
+            </View>
             <View style={styles.aiPlanContent}>
               <Text style={[styles.aiPlanTitle, { color: colors.textPrimary }]}>Get Workout Plan</Text>
               <Text style={[styles.aiPlanSubtitle, { color: colors.textSecondary }]}>Personalized exercise routine</Text>
             </View>
-            <Icon name="arrow-right" size={24} color="#42A5F5" />
+            <Icon name="arrow-right" size={24} color={iconColors.workout} />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.aiPlanButton, { 
-              backgroundColor: isDark ? '#AB47BC' + '20' : '#AB47BC' + '15', 
-              borderColor: '#AB47BC' 
+              backgroundColor: isDark ? iconColors.marathon + '20' : iconColors.marathon + '15', 
+              borderColor: iconColors.marathon 
             }]}
             onPress={() => navigation.navigate('MarathonPlan')}
           >
-            <Icon name="run-fast" size={36} color="#AB47BC" />
+            <View style={[styles.iconCircle, { backgroundColor: iconColors.marathon + '25' }]}>
+              <Icon name="run-fast" size={32} color={iconColors.marathon} />
+            </View>
             <View style={styles.aiPlanContent}>
               <Text style={[styles.aiPlanTitle, { color: colors.textPrimary }]}>Get Marathon Plan</Text>
               <Text style={[styles.aiPlanSubtitle, { color: colors.textSecondary }]}>Race preparation training</Text>
             </View>
-            <Icon name="arrow-right" size={24} color="#AB47BC" />
+            <Icon name="arrow-right" size={24} color={iconColors.marathon} />
           </TouchableOpacity>
         </View>
       )}
@@ -371,22 +359,19 @@ const styles = StyleSheet.create({
   stepsGoal: { fontSize: 14, marginTop: 4 },
   statsRow: { flexDirection: 'row', gap: 24 },
   statItem: { alignItems: 'center', gap: 6 },
+  iconCircle: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
   statValue: { fontSize: 14, fontWeight: '600' },
   card: { 
-    padding: 20, 
+    padding: 24, 
     borderRadius: 20, 
-    marginBottom: 16, 
+    marginBottom: 20, 
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
   },
-  cardTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
+  cardTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
   chartHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   timePeriodLabel: { fontSize: 13, fontWeight: '600' },
   yAxisLabel: { fontSize: 12, fontWeight: '600', marginBottom: 8 },
+  xAxisLabel: { fontSize: 12, fontWeight: '600', marginTop: 8, textAlign: 'center' },
   categoriesHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   addButton: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, gap: 6 },
   addButtonText: { color: '#FFF', fontSize: 14, fontWeight: '600' },
@@ -398,11 +383,6 @@ const styles = StyleSheet.create({
     borderWidth: 2, 
     alignItems: 'center', 
     minHeight: 160,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
   },
   categoryIcon: { width: 56, height: 56, borderRadius: 28, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
   categoryName: { fontSize: 15, fontWeight: 'bold', marginBottom: 6 },
@@ -444,6 +424,14 @@ const styles = StyleSheet.create({
   modalText: { fontSize: 14, marginBottom: 20, lineHeight: 20 },
   modalButton: { paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
   modalButtonText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
+  circleContainer: { alignItems: 'center', marginBottom: 24 },
+  progressCircle: { width: 180, height: 180, borderRadius: 90, borderWidth: 12, justifyContent: 'center', alignItems: 'center' },
+  stepsValue: { fontSize: 48, fontWeight: 'bold' },
+  stepsGoal: { fontSize: 14, marginTop: 4 },
+  statsRow: { flexDirection: 'row', justifyContent: 'space-around', paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)' },
+  statItem: { alignItems: 'center', gap: 8 },
+  statLabel: { fontSize: 12, fontWeight: '600' },
+  statValue: { fontSize: 16, fontWeight: 'bold' },
 });
 
 export default ActivityTab;

@@ -103,7 +103,7 @@ const VitalsTab = () => {
 
       {/* Blood Pressure History */}
       {bpData && bpData.length > 0 ? (
-        <View style={[styles.card, { backgroundColor: colors.cardGlass, borderColor: colors.border }]}>
+        <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Blood Pressure History</Text>
           <View style={[styles.infoBox, { backgroundColor: colors.accent + '10', borderColor: colors.accent }]}>
             <Icon name="information" size={20} color={colors.accent} />
@@ -162,7 +162,7 @@ const VitalsTab = () => {
           </View>
         </View>
       ) : (
-        <View style={[styles.card, { backgroundColor: colors.cardGlass, borderColor: colors.border }]}>
+        <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Blood Pressure History</Text>
           <View style={[styles.noDataBox, { backgroundColor: colors.info + '10', borderColor: colors.info }]}>
             <Icon name="chart-line-variant" size={48} color={colors.textTertiary} />
@@ -173,9 +173,11 @@ const VitalsTab = () => {
       )}
 
       {/* Abnormalities Alert */}
-      <View style={[styles.card, { backgroundColor: colors.cardGlass, borderColor: colors.border }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={styles.alertHeader}>
-          <Icon name="alert-circle" size={24} color={colors.success} />
+          <View style={[styles.iconCircle, { backgroundColor: colors.success + '20' }]}>
+            <Icon name="alert-circle" size={24} color={colors.success} />
+          </View>
           <Text style={[styles.cardTitle, { color: colors.textPrimary, marginBottom: 0 }]}>Abnormalities</Text>
         </View>
         <View style={[styles.alertBox, { backgroundColor: colors.success + '10', borderColor: colors.success }]}>
@@ -206,11 +208,6 @@ const styles = StyleSheet.create({
     borderWidth: 1, 
     marginBottom: 12, 
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
   },
   iconCircle: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
   vitalValue: { fontSize: 24, fontWeight: 'bold', marginBottom: 2 },
@@ -219,15 +216,10 @@ const styles = StyleSheet.create({
   statusBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10 },
   statusText: { fontSize: 11, fontWeight: '600' },
   card: { 
-    padding: 20, 
+    padding: 24, 
     borderRadius: 20, 
-    marginBottom: 16, 
+    marginBottom: 20, 
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
   },
   cardTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
   infoBox: { flexDirection: 'row', padding: 12, borderRadius: 12, borderWidth: 1, gap: 10, marginBottom: 16 },
@@ -247,6 +239,7 @@ const styles = StyleSheet.create({
   },
   yAxisLabel: { fontSize: 11, fontWeight: '600' },
   alertHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
+  iconCircle: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
   alertBox: { flexDirection: 'row', padding: 16, borderRadius: 12, borderWidth: 1, gap: 12 },
   alertText: { flex: 1, fontSize: 14 },
   noDataBox: { 

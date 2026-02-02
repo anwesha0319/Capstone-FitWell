@@ -177,15 +177,15 @@ export const getTodayData = async () => {
 };
 
 const getDefaultTodayData = () => ({
-  steps: 5400,
-  water: 2.1,
-  sleep: 7.2,
-  weight: 75,
-  calories: 976,
-  caloriesBurned: 312,
-  distance: 3.12,
-  duration: 45,
-  heartRate: 72,
+  steps: 0,
+  water: 0,
+  sleep: 0,
+  weight: 0,
+  calories: 0,
+  caloriesBurned: 0,
+  distance: 0,
+  duration: 0,
+  heartRate: 0,
   lastUpdated: new Date().toISOString(),
 });
 

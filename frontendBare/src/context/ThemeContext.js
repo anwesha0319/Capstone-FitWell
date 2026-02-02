@@ -71,19 +71,19 @@ const lightColors = {
   secondaryBgEnd: '#F5F8FF',   // Airy white-blue
   
   // Glassmorphism Cards - AI Sidekick Frosted Glass
-  card: 'rgba(255, 255, 255, 0.25)',      // Primary glass (25% opacity)
-  cardGlass: 'rgba(255, 255, 255, 0.35)', // Nested glass (35% opacity)
-  cardStrong: 'rgba(255, 255, 255, 0.40)', // Strong glass for inputs
-  cardBorder: 'rgba(255, 255, 255, 0.4)', // Frosted edge highlight
-  cardBorderInner: 'rgba(255, 255, 255, 0.2)', // Inner glow
+  card: 'rgba(255, 255, 255, 0.55)',      // Primary glass (55% opacity - clearer)
+  cardGlass: 'rgba(255, 255, 255, 0.45)', // Nested glass (45% opacity)
+  cardStrong: 'rgba(255, 255, 255, 0.65)', // Strong glass for inputs (65% opacity)
+  cardBorder: 'rgba(255, 255, 255, 0.75)', // Frosted edge highlight (brighter)
+  cardBorderInner: 'rgba(255, 255, 255, 0.5)', // Inner glow
   cardTint: 'rgba(139, 92, 246, 0.08)',   // Purple tint overlay
   
   // Text - Deep Purple Tones (AI Sidekick Style) - FIXED FOR VISIBILITY
-  textPrimary: '#1A0B2E',      // Deep purple-black (H1) - HIGH CONTRAST
-  textSecondary: '#2D1B4E',    // Dark purple (H2) - HIGH CONTRAST
-  textTertiary: '#3D2B5F',     // Medium purple-gray (body) - READABLE
-  textLabel: '#4A3A6C',        // Darker for labels - MORE VISIBLE
-  textPlaceholder: '#6B5B8C',  // Darker placeholder - MORE VISIBLE
+  textPrimary: '#0F0A1A',      // Almost black with purple tint (H1) - MAXIMUM CONTRAST
+  textSecondary: '#1A0F2E',    // Very dark purple (H2) - HIGH CONTRAST
+  textTertiary: '#2D1B4E',     // Dark purple (body) - READABLE
+  textLabel: '#3D2B5F',        // Medium dark for labels - VISIBLE
+  textPlaceholder: '#4A3A6C',  // Medium for placeholder - VISIBLE
   textOnAccent: '#FFFFFF',     // Text on accent buttons
   textDisabled: '#9B8FB8',     // Disabled text
   

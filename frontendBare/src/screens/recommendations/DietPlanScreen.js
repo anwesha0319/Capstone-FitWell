@@ -224,7 +224,7 @@ const DietPlanScreen = ({ navigation }) => {
             )}
 
             {/* Input Form */}
-            <View style={[styles.card, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <Text style={[styles.label, { color: colors.textSecondary }]}>Plan Duration</Text>
               <View style={styles.durationGrid}>
                 {durationOptions.map((option) => (
@@ -310,7 +310,7 @@ const DietPlanScreen = ({ navigation }) => {
         ) : (
           <View>
             {/* Success Message */}
-            <View style={[styles.card, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={styles.resultHeader}>
                 <Icon name="check-circle" size={64} color={colors.success} />
                 <Text style={[styles.resultTitle, { color: colors.textPrimary }]}>

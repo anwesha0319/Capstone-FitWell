@@ -249,7 +249,7 @@ const NutritionTab = ({ navigation }) => {
       <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Nutrition</Text>
 
       {/* Hydration - Water Drop */}
-      <View style={[styles.card, { backgroundColor: 'transparent', borderColor: colors.cardBorder }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={styles.hydrationHeader}>
           <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Hydration</Text>
           <TouchableOpacity 
@@ -320,7 +320,7 @@ const NutritionTab = ({ navigation }) => {
               value={waterInput}
               onChangeText={setWaterInput}
               keyboardType="decimal-pad"
-              placeholder="2.1"
+              placeholder="0"
               placeholderTextColor={colors.textTertiary}
             />
             <View style={styles.modalButtons}>
@@ -342,7 +342,7 @@ const NutritionTab = ({ navigation }) => {
       </Modal>
 
       {/* Weekly Water Intake Chart */}
-      <View style={[styles.card, { backgroundColor: 'transparent', borderColor: colors.cardBorder }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Weekly Water Intake</Text>
         <Text style={[styles.weekInfo, { color: colors.textSecondary }]}>
           Week of {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -383,11 +383,16 @@ const NutritionTab = ({ navigation }) => {
 
       {/* Today's Meal Plan */}
       {showMealPlan && mealPlan && (
-        <View style={[styles.card, { backgroundColor: 'transparent', borderColor: colors.cardBorder }]}>
+        <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <View style={styles.mealPlanHeader}>
-            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
-              Today's Meal Plan
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <View style={[styles.iconCircle, { backgroundColor: colors.accent + '20' }]}>
+                <Icon name="food" size={20} color={colors.accent} />
+              </View>
+              <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
+                Today's Meal Plan
+              </Text>
+            </View>
             <TouchableOpacity onPress={loadMealPlan}>
               <Icon name="refresh" size={20} color={colors.accent} />
             </TouchableOpacity>
@@ -434,30 +439,24 @@ const NutritionTab = ({ navigation }) => {
                     
                     <View style={styles.trackingButtons}>
                       <TouchableOpacity
-                        style={[
-                          styles.trackButton,
-                          item.tracked && item.status === 'eaten' && { backgroundColor: colors.success }
-                        ]}
+                        style={styles.trackButton}
                         onPress={() => handleTrackMeal(item.id, 'eaten')}
                       >
                         <Icon 
-                          name={item.tracked && item.status === 'eaten' ? 'check' : 'check-circle-outline'} 
-                          size={20} 
-                          color={item.tracked && item.status === 'eaten' ? '#FFF' : colors.success} 
+                          name="check-circle" 
+                          size={28} 
+                          color="#4CAF50" 
                         />
                       </TouchableOpacity>
                       
                       <TouchableOpacity
-                        style={[
-                          styles.trackButton,
-                          item.tracked && item.status === 'skipped' && { backgroundColor: colors.error }
-                        ]}
+                        style={styles.trackButton}
                         onPress={() => handleTrackMeal(item.id, 'skipped')}
                       >
                         <Icon 
-                          name={item.tracked && item.status === 'skipped' ? 'close' : 'close-circle-outline'} 
-                          size={20} 
-                          color={item.tracked && item.status === 'skipped' ? '#FFF' : colors.error} 
+                          name="close-circle" 
+                          size={28} 
+                          color="#F44336" 
                         />
                       </TouchableOpacity>
                     </View>
@@ -508,30 +507,24 @@ const NutritionTab = ({ navigation }) => {
                     
                     <View style={styles.trackingButtons}>
                       <TouchableOpacity
-                        style={[
-                          styles.trackButton,
-                          item.tracked && item.status === 'eaten' && { backgroundColor: colors.success }
-                        ]}
+                        style={styles.trackButton}
                         onPress={() => handleTrackMeal(item.id, 'eaten')}
                       >
                         <Icon 
-                          name={item.tracked && item.status === 'eaten' ? 'check' : 'check-circle-outline'} 
-                          size={20} 
-                          color={item.tracked && item.status === 'eaten' ? '#FFF' : colors.success} 
+                          name="check-circle" 
+                          size={28} 
+                          color="#4CAF50" 
                         />
                       </TouchableOpacity>
                       
                       <TouchableOpacity
-                        style={[
-                          styles.trackButton,
-                          item.tracked && item.status === 'skipped' && { backgroundColor: colors.error }
-                        ]}
+                        style={styles.trackButton}
                         onPress={() => handleTrackMeal(item.id, 'skipped')}
                       >
                         <Icon 
-                          name={item.tracked && item.status === 'skipped' ? 'close' : 'close-circle-outline'} 
-                          size={20} 
-                          color={item.tracked && item.status === 'skipped' ? '#FFF' : colors.error} 
+                          name="close-circle" 
+                          size={28} 
+                          color="#F44336" 
                         />
                       </TouchableOpacity>
                     </View>
@@ -582,30 +575,24 @@ const NutritionTab = ({ navigation }) => {
                     
                     <View style={styles.trackingButtons}>
                       <TouchableOpacity
-                        style={[
-                          styles.trackButton,
-                          item.tracked && item.status === 'eaten' && { backgroundColor: colors.success }
-                        ]}
+                        style={styles.trackButton}
                         onPress={() => handleTrackMeal(item.id, 'eaten')}
                       >
                         <Icon 
-                          name={item.tracked && item.status === 'eaten' ? 'check' : 'check-circle-outline'} 
-                          size={20} 
-                          color={item.tracked && item.status === 'eaten' ? '#FFF' : colors.success} 
+                          name="check-circle" 
+                          size={28} 
+                          color="#4CAF50" 
                         />
                       </TouchableOpacity>
                       
                       <TouchableOpacity
-                        style={[
-                          styles.trackButton,
-                          item.tracked && item.status === 'skipped' && { backgroundColor: colors.error }
-                        ]}
+                        style={styles.trackButton}
                         onPress={() => handleTrackMeal(item.id, 'skipped')}
                       >
                         <Icon 
-                          name={item.tracked && item.status === 'skipped' ? 'close' : 'close-circle-outline'} 
-                          size={20} 
-                          color={item.tracked && item.status === 'skipped' ? '#FFF' : colors.error} 
+                          name="close-circle" 
+                          size={28} 
+                          color="#F44336" 
                         />
                       </TouchableOpacity>
                     </View>
@@ -700,7 +687,7 @@ const NutritionTab = ({ navigation }) => {
       {!showMealPlan && navigation && (
         <>
           {/* No Meal Plan Card - Navigate to Diet Plan */}
-          <View style={[styles.card, { backgroundColor: 'transparent', borderColor: colors.cardBorder }]}>
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Icon name="food-off" size={64} color={colors.textTertiary} style={{ alignSelf: 'center', marginBottom: 16 }} />
             <Text style={[styles.noPlanText, { color: colors.textSecondary }]}>No meal plan available for today.</Text>
             <Text style={[styles.noPlanSubtext, { color: colors.textTertiary, textAlign: 'center', marginVertical: 8 }]}>
@@ -729,15 +716,10 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 100 },
   sectionTitle: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
   card: { 
-    padding: 20, 
+    padding: 24, 
     borderRadius: 20, 
-    marginBottom: 16, 
+    marginBottom: 20, 
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
   },
   cardTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
   weekInfo: { fontSize: 13, fontWeight: '600', marginBottom: 12 },
@@ -796,6 +778,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
+  iconCircle: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
   mealSection: {
     marginBottom: 24,
   },
@@ -852,13 +835,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   trackButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
   },
   generateButton: {
     flexDirection: 'row',

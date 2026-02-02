@@ -1,103 +1,140 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import GradientBackground from '../../components/GradientBackground';
-import GlassButton from '../../components/GlassButton';
-import AppLogo from '../../components/AppLogo';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ImageBackground,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+} from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
-import { getTypographyStyle } from '../../utils/styleHelpers';
+
+const { width, height } = Dimensions.get('window');
 
 const WelcomeScreen = ({ navigation }) => {
   const { colors } = useTheme();
 
   return (
-    <GradientBackground>
-      <View style={styles.container}>
-        {/* Logo Top Section */}
-        <View style={styles.topSection}>
-          <AppLogo size={100} />
+    <ImageBackground
+      source={require('../../assets/images/backgrounds/welcome_bg.jpg')}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      {/* Dark overlay for better text visibility */}
+      <View style={styles.overlay} />
+
+      <View style={styles.content}>
+        {/* Logo at top */}
+        <View style={styles.logoContainer}>
+          <Image
+            source={require('../../assets/images/fitwell_logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </View>
 
-        {/* Spacer */}
-        <View style={styles.spacer} />
-
-        {/* Center Content */}
+        {/* Center content */}
         <View style={styles.centerContent}>
-          <Text style={[getTypographyStyle(colors, 'h1'), styles.appName]}>
-            FitWell
-          </Text>
-          <Text style={[getTypographyStyle(colors, 'body'), styles.tagline]}>
-            Track your progress and stay on top of your health
+          <Text style={styles.title}>FitWell</Text>
+          <Text style={styles.subtitle}>
+            Track your health progress and{'\n'}stay on top of your goals
           </Text>
         </View>
 
-        {/* Spacer */}
-        <View style={styles.spacer} />
-
-        {/* Buttons at Bottom */}
+        {/* Bottom buttons */}
         <View style={styles.buttonContainer}>
-          <GlassButton
-            variant="primary"
-            size="large"
+          <TouchableOpacity
+            style={[styles.button, styles.primaryButton]}
             onPress={() => navigation.navigate('Signup')}
-            icon={<Icon name="account-plus" size={20} color="#FFF" />}
           >
-            Create Account
-          </GlassButton>
+            <Text style={styles.primaryButtonText}>Get Started</Text>
+          </TouchableOpacity>
 
-          <GlassButton
-            variant="secondary"
-            size="large"
+          <TouchableOpacity
+            style={[styles.button, styles.secondaryButton]}
             onPress={() => navigation.navigate('Login')}
-            icon={<Icon name="login" size={20} color={colors.accent} />}
           >
-            Log In
-          </GlassButton>
-
-          <Text style={[getTypographyStyle(colors, 'caption'), styles.footer]}>
-            © 2026 FitWell. All rights reserved.
-          </Text>
+            <Text style={styles.secondaryButtonText}>I already have an account</Text>
+          </TouchableOpacity>
         </View>
       </View>
-    </GradientBackground>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 30,
-    paddingTop: 60,
-    paddingBottom: 40,
+    width: width,
+    height: height,
   },
-  topSection: {
-    marginTop: 20,
-    alignItems: 'center',
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
-  spacer: {
+  content: {
     flex: 1,
+    justifyContent: 'space-between',
+    paddingVertical: 60,
+    paddingHorizontal: 30,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  logo: {
+    width: 150,
+    height: 150,
   },
   centerContent: {
     alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
   },
-  appName: {
+  title: {
     fontSize: 56,
     fontWeight: 'bold',
-    letterSpacing: 2,
+    color: '#FFFFFF',
     marginBottom: 16,
-    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 10,
   },
-  tagline: {
+  subtitle: {
+    fontSize: 18,
+    color: '#FFFFFF',
     textAlign: 'center',
-    paddingHorizontal: 40,
-    lineHeight: 24,
+    lineHeight: 26,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 5,
   },
   buttonContainer: {
     gap: 16,
   },
-  footer: {
-    textAlign: 'center',
-    marginTop: 20,
+  button: {
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  primaryButton: {
+    backgroundColor: '#8B5CF6',
+  },
+  primaryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  secondaryButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  secondaryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

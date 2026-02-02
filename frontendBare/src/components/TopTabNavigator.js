@@ -1,17 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
-  Dimensions,
   Alert,
+  Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useTheme } from '../context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
 
 // Import screens
 import HomeScreen from '../screens/main/HomeScreen';
@@ -20,18 +19,10 @@ import MyProfileScreen from '../screens/main/MyProfileScreen';
 import AboutFitWellScreen from '../screens/main/AboutFitWellScreen';
 
 const { width } = Dimensions.get('window');
+const Tab = createMaterialTopTabNavigator();
 
 const TopTabNavigator = () => {
   const { colors, isDark, toggleTheme } = useTheme();
-  const [activeTab, setActiveTab] = useState('Home');
-  const navigation = useNavigation();
-
-  const tabs = [
-    { name: 'Home', icon: 'home', label: 'Home' },
-    { name: 'Analytics', icon: 'chart-box', label: 'Statistic' },
-    { name: 'My Profile', icon: 'account', label: 'Profile' },
-    { name: 'About FitWell', icon: 'information', label: 'About' },
-  ];
 
   const handleLogout = () => {
     Alert.alert(
@@ -54,87 +45,114 @@ const TopTabNavigator = () => {
     );
   };
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'Home':
-        return <HomeScreen navigation={navigation} />;
-      case 'Analytics':
-        return <AnalyticsScreen navigation={navigation} />;
-      case 'My Profile':
-        return <MyProfileScreen />;
-      case 'About FitWell':
-        return <AboutFitWellScreen />;
-      default:
-        return <HomeScreen navigation={navigation} />;
-    }
-  };
-
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? colors.backgroundStart : colors.backgroundStart }]}>
-      {/* Top Tab Bar */}
-      <View style={[styles.tabBar, { backgroundColor: colors.card + '80' }]}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabScrollContent}
-        >
-          {tabs.map((tab) => (
-            <TouchableOpacity
-              key={tab.name}
-              style={[
-                styles.tab,
-                activeTab === tab.name ? [
-                  styles.tabActive,
-                  { backgroundColor: colors.card, borderColor: colors.border }
-                ] : styles.tabInactive
-              ]}
-              onPress={() => setActiveTab(tab.name)}
-              activeOpacity={0.7}
-            >
-              <Icon
-                name={tab.icon}
-                size={activeTab === tab.name ? 22 : 24}
-                color={activeTab === tab.name ? colors.accent : colors.textSecondary}
-              />
-              {activeTab === tab.name && (
-                <Text
-                  style={[
-                    styles.tabText,
-                    { color: colors.textPrimary }
-                  ]}
-                >
-                  {tab.label}
-                </Text>
-              )}
-            </TouchableOpacity>
-          ))}
+    <View style={styles.container}>
+      <Tab.Navigator
+        initialRouteName="Home"
+        screenOptions={{
+          tabBarScrollEnabled: true,
+          tabBarActiveTintColor: colors.accent,
+          tabBarInactiveTintColor: colors.textSecondary,
+          tabBarLabelStyle: {
+            fontSize: 15,
+            fontWeight: '600',
+            textTransform: 'none',
+          },
+          tabBarStyle: {
+            backgroundColor: colors.card + '80',
+            paddingTop: 50,
+            paddingBottom: 12,
+            elevation: 0,
+            shadowOpacity: 0,
+            borderBottomWidth: 0,
+          },
+          tabBarIndicatorStyle: {
+            backgroundColor: colors.accent,
+            height: 3,
+            borderRadius: 3,
+          },
+          tabBarItemStyle: {
+            width: 'auto',
+            minWidth: 100,
+          },
+          swipeEnabled: true, // Enable swiping between tabs
+          animationEnabled: true,
+        }}
+      >
+        <Tab.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            tabBarIcon: ({ color, focused }) => (
+              <Icon name="home" size={focused ? 22 : 24} color={color} />
+            ),
+            tabBarLabel: ({ focused }) => focused ? 'Home' : '',
+          }}
+        />
+        <Tab.Screen
+          name="Analytics"
+          component={AnalyticsScreen}
+          options={{
+            tabBarIcon: ({ color, focused }) => (
+              <Icon name="chart-box" size={focused ? 22 : 24} color={color} />
+            ),
+            tabBarLabel: ({ focused }) => focused ? 'Statistic' : '',
+          }}
+        />
+        <Tab.Screen
+          name="Profile"
+          component={MyProfileScreen}
+          options={{
+            tabBarIcon: ({ color, focused }) => (
+              <Icon name="account" size={focused ? 22 : 24} color={color} />
+            ),
+            tabBarLabel: ({ focused }) => focused ? 'Profile' : '',
+          }}
+        />
+        <Tab.Screen
+          name="About"
+          component={AboutFitWellScreen}
+          options={{
+            tabBarIcon: ({ color, focused }) => (
+              <Icon name="information" size={focused ? 22 : 24} color={color} />
+            ),
+            tabBarLabel: ({ focused }) => focused ? 'About' : '',
+          }}
+        />
+        <Tab.Screen
+          name="Settings"
+          component={SettingsTab}
+          options={{
+            tabBarIcon: ({ color }) => (
+              <View style={styles.settingsIcons}>
+                <TouchableOpacity onPress={toggleTheme} style={styles.iconButton}>
+                  <Icon
+                    name={isDark ? 'white-balance-sunny' : 'moon-waning-crescent'}
+                    size={24}
+                    color={colors.accent}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleLogout} style={styles.iconButton}>
+                  <Icon name="logout" size={24} color={isDark ? colors.error : '#DC2626'} />
+                </TouchableOpacity>
+              </View>
+            ),
+            tabBarLabel: () => null,
+          }}
+        />
+      </Tab.Navigator>
+    </View>
+  );
+};
 
-          {/* Theme Toggle Icon */}
-          <TouchableOpacity
-            style={styles.iconTabTransparent}
-            onPress={toggleTheme}
-            activeOpacity={0.7}
-          >
-            <Icon
-              name={isDark ? 'white-balance-sunny' : 'moon-waning-crescent'}
-              size={24}
-              color={colors.accent}
-            />
-          </TouchableOpacity>
-
-          {/* Logout Icon */}
-          <TouchableOpacity
-            style={styles.iconTabTransparent}
-            onPress={handleLogout}
-            activeOpacity={0.7}
-          >
-            <Icon name="logout" size={24} color={isDark ? colors.error : '#DC2626'} />
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
-
-      {/* Content */}
-      <View style={styles.content}>{renderContent()}</View>
+// Dummy Settings component (just shows the icons)
+const SettingsTab = () => {
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.settingsContainer, { backgroundColor: colors.backgroundStart }]}>
+      <Text style={[styles.settingsText, { color: colors.textPrimary }]}>
+        Use the icons above to toggle theme or logout
+      </Text>
     </View>
   );
 };
@@ -143,65 +161,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  tabBar: {
-    paddingTop: 50,
-    paddingBottom: 12,
-    paddingHorizontal: 16,
-  },
-  tabScrollContent: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  tab: {
+  settingsIcons: {
     flexDirection: 'row',
+    gap: 12,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 25,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: 'transparent',
   },
-  tabActive: {
-    paddingHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  tabInactive: {
-    width: 48,
-    height: 48,
-    paddingHorizontal: 0,
-  },
-  tabText: {
-    fontSize: 15,
-    fontWeight: '600',
-    letterSpacing: 0.3,
-  },
-  iconTab: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  iconTabTransparent: {
-    width: 48,
-    height: 48,
+  iconButton: {
+    width: 40,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  content: {
+  settingsContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  settingsText: {
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 

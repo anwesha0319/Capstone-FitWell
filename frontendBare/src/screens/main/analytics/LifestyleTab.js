@@ -239,7 +239,7 @@ const LifestyleTab = () => {
       <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Lifestyle</Text>
 
       {!hasLifestyleData && (
-        <View style={[styles.card, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+        <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={[styles.noDataTitle, { color: colors.textPrimary }]}>Lifestyle info not set</Text>
           <Text style={[styles.noDataText, { color: colors.textSecondary }]}>We couldn't find lifestyle details in your profile. Please open your profile and provide diet, smoking and alcohol details so we can give accurate insights.</Text>
           <TouchableOpacity style={[styles.generateButton, { backgroundColor: colors.accent, alignSelf: 'center' }]} onPress={() => {/* navigate to profile if available */}}>
@@ -297,7 +297,7 @@ const LifestyleTab = () => {
       </ScrollView>
 
       {/* Health Score */}
-      <View style={[styles.card, { backgroundColor: colors.cardGlass, borderColor: colors.border }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={styles.scoreHeader}>
           <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Health Score</Text>
           <TouchableOpacity onPress={() => setShowDetails(true)}>
@@ -350,9 +350,11 @@ const LifestyleTab = () => {
       </View>
 
       {/* Health Risk Insights */}
-      <View style={[styles.card, { backgroundColor: colors.cardGlass, borderColor: colors.border }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={styles.riskHeader}>
-          <Icon name="shield-alert" size={24} color={colors.warning} />
+          <View style={[styles.iconCircle, { backgroundColor: colors.warning + '20' }]}>
+            <Icon name="shield-alert" size={24} color={colors.warning} />
+          </View>
           <Text style={[styles.cardTitle, { color: colors.textPrimary, marginBottom: 0 }]}>Disease Risks</Text>
         </View>
         <Text style={[styles.riskSubtitle, { color: colors.textSecondary }]}>
@@ -677,26 +679,16 @@ const styles = StyleSheet.create({
     borderWidth: 1, 
     marginRight: 12, 
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
   },
   iconCircle: { width: 56, height: 56, borderRadius: 28, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
   cardLabel: { fontSize: 12, fontWeight: '600', marginBottom: 4 },
   cardValue: { fontSize: 14, fontWeight: 'bold', textAlign: 'center' },
   stressNote: { fontSize: 10, marginTop: 4 },
   card: { 
-    padding: 20, 
+    padding: 24, 
     borderRadius: 20, 
-    marginBottom: 16, 
+    marginBottom: 20, 
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
   },
   scoreHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   cardTitle: { fontSize: 18, fontWeight: 'bold' },
@@ -715,6 +707,7 @@ const styles = StyleSheet.create({
   messageBox: { flexDirection: 'row', padding: 16, borderRadius: 12, borderWidth: 1, gap: 12, alignItems: 'center' },
   messageText: { flex: 1, fontSize: 14, fontWeight: '600' },
   riskHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 8 },
+  iconCircle: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
   riskSubtitle: { fontSize: 13, marginBottom: 16 },
   riskCard: { padding: 16, borderRadius: 16, borderWidth: 1, marginBottom: 12 },
   riskRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },

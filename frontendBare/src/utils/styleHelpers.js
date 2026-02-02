@@ -151,35 +151,35 @@ export const getTypographyStyle = (colors, variant = 'body') => {
     h2: {
       fontSize: 24,
       fontWeight: '600',
-      color: colors.textSecondary,
+      color: colors.textPrimary,
       letterSpacing: -0.3,
     },
     h3: {
       fontSize: 20,
       fontWeight: '600',
-      color: colors.textSecondary,
+      color: colors.textPrimary,
     },
     body: {
       fontSize: 16,
       fontWeight: '400',
-      color: colors.textTertiary,
+      color: colors.textSecondary,
       lineHeight: 24,
     },
     bodyMedium: {
       fontSize: 16,
       fontWeight: '500',
-      color: colors.textTertiary,
+      color: colors.textPrimary,
       lineHeight: 24,
     },
     label: {
       fontSize: 14,
       fontWeight: '500',
-      color: colors.textLabel,
+      color: colors.textSecondary,
     },
     caption: {
       fontSize: 12,
       fontWeight: '400',
-      color: colors.textLabel,
+      color: colors.textSecondary,
     },
     placeholder: {
       fontSize: 16,

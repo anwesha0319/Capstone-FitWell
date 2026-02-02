@@ -12,7 +12,7 @@ import TopTabNavigator from '../components/TopTabNavigator';
 
 // Import screens
 import WelcomeScreen from '../screens/auth/WelcomeScreen';
-import LoginOnlyScreen from '../screens/auth/LoginOnlyScreen';
+import LoginScreen from '../screens/auth/LoginScreen';
 import SignupScreen from '../screens/auth/SignupScreen';
 import DietPlanScreen from '../screens/recommendations/DietPlanScreen';
 import WorkoutPlanScreen from '../screens/recommendations/WorkoutPlanScreen';
@@ -35,7 +35,7 @@ const AuthStack = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
-      <Stack.Screen name="Login" component={LoginOnlyScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
     </Stack.Navigator>
   );

@@ -49,18 +49,31 @@ def generate_meal_plan(calories, diet_type, allergies, goal, days, feedback=None
     feedback_text = ""
 
     if feedback:
+        skipped_info = ""
+        if feedback.get('skipped_meals'):
+            skipped_info = f"\nMeals user SKIPPED (avoid these): {', '.join(feedback['skipped_meals'][:10])}"
+        
+        eaten_info = ""
+        if feedback.get('eaten_meals'):
+            eaten_info = f"\nMeals user ENJOYED (similar items are good): {', '.join(feedback['eaten_meals'][:10])}"
+
         feedback_text = f"""
         User recent intake summary:
         Calories eaten: {feedback['calories']}
         Protein eaten: {feedback['protein']}g
         Carbs eaten: {feedback['carbs']}g
         Fat eaten: {feedback['fat']}g
+        {skipped_info}
+        {eaten_info}
 
-        Adjust the new meal plan to correct imbalances and match user preferences.
+        IMPORTANT: 
+        - AVOID meals similar to skipped items (user didn't like them)
+        - Include more meals similar to eaten items (user enjoyed them)
+        - Adjust the new meal plan to correct nutritional imbalances
         """
 
     prompt = f"""
-    Create a {days}-day healthy meal plan.
+    Create a {days}-day healthy meal plan with MAXIMUM VARIETY.
 
     Daily calories target: {calories}
     Diet type: {diet_type}
@@ -69,9 +82,24 @@ def generate_meal_plan(calories, diet_type, allergies, goal, days, feedback=None
 
     {feedback_text}
 
+    CRITICAL REQUIREMENTS FOR VARIETY:
+    1. NEVER repeat the same meal across different days
+    2. Each day must have completely different breakfast, lunch, and dinner items
+    3. Use diverse cuisines: Indian, Mediterranean, Asian, Mexican, American, etc.
+    4. Vary cooking methods: grilled, baked, steamed, raw, stir-fried, etc.
+    5. Include seasonal variety and different protein sources
+    6. Mix different grains: rice, quinoa, oats, wheat, millet, etc.
+    7. Rotate vegetables and fruits daily
+    8. Provide interesting flavor combinations
+
+    CALORIE DISTRIBUTION:
+    - Breakfast: {int(calories * 0.25)} calories (25%)
+    - Lunch: {int(calories * 0.40)} calories (40%)
+    - Dinner: {int(calories * 0.35)} calories (35%)
+
     Each day must include Breakfast, Lunch, Dinner.
-    Each meal must contain multiple food items with:
-    - name (string)
+    Each meal must contain 2-4 food items with:
+    - name (string) - Be specific and creative
     - calories (number)
     - protein (number in grams)
     - carbs (number in grams)
@@ -82,16 +110,33 @@ def generate_meal_plan(calories, diet_type, allergies, goal, days, feedback=None
     {{
         "1": {{
             "breakfast": [
-                {{"name": "Oatmeal", "calories": 150, "protein": 5, "carbs": 27, "fat": 3}},
-                {{"name": "Banana", "calories": 105, "protein": 1, "carbs": 27, "fat": 0}}
+                {{"name": "Masala Oatmeal with Almonds", "calories": 180, "protein": 7, "carbs": 28, "fat": 5}},
+                {{"name": "Fresh Mango Slices", "calories": 90, "protein": 1, "carbs": 23, "fat": 0}}
+            ],
+            "lunch": [
+                {{"name": "Grilled Paneer Tikka", "calories": 250, "protein": 18, "carbs": 8, "fat": 16}},
+                {{"name": "Quinoa Pulao with Vegetables", "calories": 220, "protein": 8, "carbs": 38, "fat": 4}}
+            ],
+            "dinner": [
+                {{"name": "Baked Salmon with Herbs", "calories": 280, "protein": 35, "carbs": 0, "fat": 15}},
+                {{"name": "Roasted Sweet Potato", "calories": 150, "protein": 3, "carbs": 35, "fat": 0}}
+            ]
+        }},
+        "2": {{
+            "breakfast": [
+                {{"name": "Greek Yogurt Parfait with Berries", "calories": 200, "protein": 15, "carbs": 25, "fat": 6}},
+                {{"name": "Honey Drizzle", "calories": 60, "protein": 0, "carbs": 17, "fat": 0}}
             ],
             "lunch": [...],
             "dinner": [...]
-        }},
-        "2": {{...}}
+        }}
     }}
     
-    IMPORTANT: Return ONLY the JSON object, no additional text or explanation.
+    IMPORTANT: 
+    - Return ONLY the JSON object, no additional text or explanation
+    - Ensure MAXIMUM variety - no repeated meals across days
+    - Make meals interesting and appetizing
+    - Balance nutrition while keeping variety high
     """
 
     try:

@@ -11,12 +11,13 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import GradientBackground from '../../components/GradientBackground';
+import { LinearGradient } from 'react-native-linear-gradient';
 import GlassCard from '../../components/GlassCard';
 import GlassButton from '../../components/GlassButton';
 import { useTheme } from '../../context/ThemeContext';
 import { getTypographyStyle, getIconContainerStyle } from '../../utils/styleHelpers';
-import { saveWeightGoal, getWeightGoal, getHealthData, getGoals, getTodayData } from '../../utils/storage';
+import { saveWeightGoal, getWeightGoal, getGoals } from '../../utils/storage';
+import { getHealthData, getWaterIntake } from '../../api/client';
 
 const HomeScreen = ({ navigation }) => {
   const { colors, isDark } = useTheme();
@@ -36,6 +37,20 @@ const HomeScreen = ({ navigation }) => {
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [newGoalInput, setNewGoalInput] = useState('');
 
+  // Icon colors - darker for light mode
+  const getIconColor = (lightColor, darkColor) => isDark ? darkColor : lightColor;
+  
+  const iconColors = {
+    heartRate: getIconColor('#D81B60', '#EC4899'),
+    sleep: getIconColor('#6A1B9A', '#8B5CF6'),
+    water: getIconColor('#0277BD', '#0EA5E9'),
+    bmi: getIconColor('#00897B', '#10B981'),
+    diet: getIconColor('#00897B', '#10B981'),
+    workout: getIconColor('#6A1B9A', '#8B5CF6'),
+    marathon: getIconColor('#6A1B9A', '#8B5CF6'),
+    running: getIconColor('#6A1B9A', '#8B5CF6'),
+  };
+
   useEffect(() => {
     loadUserData();
     loadHealthData();
@@ -43,26 +58,63 @@ const HomeScreen = ({ navigation }) => {
   }, []);
 
   const loadHealthData = async () => {
-    const healthData = await getHealthData();
-    const goals = await getGoals();
-    const goal = await getWeightGoal();
-    const todayData = await getTodayData();
-    
-    setCurrentWeight(todayData.weight?.toString() || healthData.weight);
-    setWeightGoalState(goal);
-    setStepsGoal(goals.stepsGoal);
-    setSleepHours(todayData.sleep?.toString() || '0');
-    setTodaySteps(todayData.steps || 0);
-    setTodayCalories(todayData.calories || 0);
-    setTodayDistance(todayData.distance || 0);
-    setTodayMinutes(todayData.minutes || 0);
-    setTodayWater(todayData.water || 0);
-    setHeartRate(todayData.heartRate || 0);
-    
-    if (healthData.height && currentWeight) {
-      const heightInMeters = healthData.height / 100;
-      const bmiValue = parseFloat(currentWeight) / (heightInMeters * heightInMeters);
-      setBmi(bmiValue.toFixed(1));
+    try {
+      // Fetch from database API
+      const healthDataArray = await getHealthData(1); // Get today's data
+      const goals = await getGoals();
+      const goal = await getWeightGoal();
+      
+      if (healthDataArray && healthDataArray.length > 0) {
+        const todayData = healthDataArray[0];
+        setTodaySteps(todayData.steps || 0);
+        setTodayCalories(todayData.calories_burned || 0);
+        setTodayDistance(todayData.distance || 0);
+        setTodayMinutes(todayData.duration || 0);
+        setHeartRate(todayData.heart_rate || 0);
+        setCurrentWeight(todayData.weight?.toString() || '75');
+        setSleepHours(todayData.sleep_hours?.toString() || '0');
+        
+        // Calculate BMI if height is available
+        const heightInMeters = todayData.height ? todayData.height / 100 : 1.75;
+        const weight = parseFloat(todayData.weight || 75);
+        const bmiValue = weight / (heightInMeters * heightInMeters);
+        setBmi(bmiValue.toFixed(1));
+      } else {
+        // No data from API, set defaults
+        setTodaySteps(0);
+        setTodayCalories(0);
+        setTodayDistance(0);
+        setTodayMinutes(0);
+        setHeartRate(0);
+        setSleepHours('0');
+      }
+      
+      // Fetch water intake from database
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const waterResult = await getWaterIntake(today);
+        if (waterResult.success) {
+          setTodayWater(waterResult.amount || 0);
+        } else {
+          setTodayWater(0);
+        }
+      } catch (error) {
+        console.log('No water data for today');
+        setTodayWater(0);
+      }
+      
+      setWeightGoalState(goal);
+      setStepsGoal(goals.stepsGoal);
+    } catch (error) {
+      console.error('Error loading health data:', error);
+      // Set defaults on error
+      setTodaySteps(0);
+      setTodayCalories(0);
+      setTodayDistance(0);
+      setTodayMinutes(0);
+      setTodayWater(0);
+      setHeartRate(0);
+      setSleepHours('0');
     }
   };
 
@@ -97,7 +149,10 @@ const HomeScreen = ({ navigation }) => {
   };
 
   return (
-    <GradientBackground>
+    <LinearGradient
+      colors={isDark ? [colors.backgroundStart, colors.backgroundMid, colors.backgroundEnd] : [colors.backgroundStart, colors.backgroundMid, colors.backgroundEnd]}
+      style={styles.container}
+    >
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
@@ -142,7 +197,7 @@ const HomeScreen = ({ navigation }) => {
 
         <GlassCard variant="primary">
           {/* Running Icon */}
-          <View style={[styles.runningIconContainer, { backgroundColor: colors.accent }]}>
+          <View style={[styles.runningIconContainer, { backgroundColor: iconColors.running }]}>
             <Icon name="run" size={80} color="#FFFFFF" />
           </View>
           
@@ -216,25 +271,33 @@ const HomeScreen = ({ navigation }) => {
         {/* Health Metrics Grid */}
         <View style={styles.metricsGrid}>
           <GlassCard variant="primary" style={styles.metricCard}>
-            <Icon name="heart-pulse" size={32} color={colors.iconHeart} />
+            <View style={[styles.metricIconCircle, { backgroundColor: iconColors.heartRate + '20' }]}>
+              <Icon name="heart-pulse" size={36} color={iconColors.heartRate} />
+            </View>
             <Text style={getTypographyStyle(colors, 'h1')}>{heartRate || 0}</Text>
             <Text style={getTypographyStyle(colors, 'label')}>Heart Rate</Text>
           </GlassCard>
 
           <GlassCard variant="primary" style={styles.metricCard}>
-            <Icon name="sleep" size={32} color={colors.iconSleep} />
+            <View style={[styles.metricIconCircle, { backgroundColor: iconColors.sleep + '20' }]}>
+              <Icon name="sleep" size={36} color={iconColors.sleep} />
+            </View>
             <Text style={getTypographyStyle(colors, 'h1')}>{sleepHours}h</Text>
             <Text style={getTypographyStyle(colors, 'label')}>Sleep</Text>
           </GlassCard>
 
           <GlassCard variant="primary" style={styles.metricCard}>
-            <Icon name="water" size={32} color={colors.iconWater} />
+            <View style={[styles.metricIconCircle, { backgroundColor: iconColors.water + '20' }]}>
+              <Icon name="water" size={36} color={iconColors.water} />
+            </View>
             <Text style={getTypographyStyle(colors, 'h1')}>{todayWater.toFixed(1)}L</Text>
             <Text style={getTypographyStyle(colors, 'label')}>Water Intake</Text>
           </GlassCard>
           
           <GlassCard variant="primary" style={styles.metricCard}>
-            <Icon name="human-male-height" size={32} color={colors.success} />
+            <View style={[styles.metricIconCircle, { backgroundColor: iconColors.bmi + '20' }]}>
+              <Icon name="human-male-height" size={36} color={iconColors.bmi} />
+            </View>
             <Text style={getTypographyStyle(colors, 'h1')}>{bmi || 0}</Text>
             <Text style={getTypographyStyle(colors, 'label')}>BMI</Text>
           </GlassCard>
@@ -248,7 +311,9 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.recommendationsRow}>
           <TouchableOpacity style={styles.recommendCard} onPress={() => navigation.navigate('DietPlan')}>
             <GlassCard variant="nested" style={styles.recommendCardInner}>
-              <Icon name="food-apple" size={32} color={isDark ? colors.iconApple : '#10B981'} />
+              <View style={[styles.recommendIconCircle, { backgroundColor: iconColors.diet + '20' }]}>
+                <Icon name="food-apple" size={28} color={iconColors.diet} />
+              </View>
               <Text style={[getTypographyStyle(colors, 'bodyMedium'), { fontSize: 13 }]}>Diet Plan</Text>
               <Text style={[getTypographyStyle(colors, 'caption'), { fontSize: 11, textAlign: 'center', marginTop: 4 }]}>AI nutrition</Text>
             </GlassCard>
@@ -256,7 +321,9 @@ const HomeScreen = ({ navigation }) => {
 
           <TouchableOpacity style={styles.recommendCard} onPress={() => navigation.navigate('WorkoutPlan')}>
             <GlassCard variant="nested" style={styles.recommendCardInner}>
-              <Icon name="dumbbell" size={32} color={isDark ? colors.iconDumbbell : '#8B5CF6'} />
+              <View style={[styles.recommendIconCircle, { backgroundColor: iconColors.workout + '20' }]}>
+                <Icon name="dumbbell" size={28} color={iconColors.workout} />
+              </View>
               <Text style={[getTypographyStyle(colors, 'bodyMedium'), { fontSize: 13 }]}>Workout</Text>
               <Text style={[getTypographyStyle(colors, 'caption'), { fontSize: 11, textAlign: 'center', marginTop: 4 }]}>Custom plan</Text>
             </GlassCard>
@@ -264,7 +331,9 @@ const HomeScreen = ({ navigation }) => {
 
           <TouchableOpacity style={styles.recommendCard} onPress={() => navigation.navigate('MarathonPlan')}>
             <GlassCard variant="nested" style={styles.recommendCardInner}>
-              <Icon name="run-fast" size={32} color={isDark ? colors.accent : '#8B5CF6'} />
+              <View style={[styles.recommendIconCircle, { backgroundColor: iconColors.marathon + '20' }]}>
+                <Icon name="run-fast" size={28} color={iconColors.marathon} />
+              </View>
               <Text style={[getTypographyStyle(colors, 'bodyMedium'), { fontSize: 13 }]}>Marathon</Text>
               <Text style={[getTypographyStyle(colors, 'caption'), { fontSize: 11, textAlign: 'center', marginTop: 4 }]}>Race prep</Text>
             </GlassCard>
@@ -433,16 +502,20 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
       </Modal>
-    </GradientBackground>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
+  container: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
   scrollContent: {
-    padding: 20,
+    paddingHorizontal: 20,
     paddingTop: 50,
   },
   greetingContainer: {
@@ -515,6 +588,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 20,
   },
+  metricIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   recommendationsRow: {
     flexDirection: 'row',
     gap: 12,
@@ -527,6 +608,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     gap: 8,
+  },
+  recommendIconCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
   },
   articleCard: {
     marginBottom: 16,

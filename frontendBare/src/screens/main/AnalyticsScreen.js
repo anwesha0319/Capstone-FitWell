@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import GradientBackground from '../../components/GradientBackground';
+import { LinearGradient } from 'react-native-linear-gradient';
 import GlassCard from '../../components/GlassCard';
 import { useTheme } from '../../context/ThemeContext';
 import { getTypographyStyle } from '../../utils/styleHelpers';
@@ -38,8 +38,11 @@ const AnalyticsScreen = ({ navigation }) => {
   };
 
   return (
-    <GradientBackground>
-      <View style={styles.container}>
+    <LinearGradient
+      colors={isDark ? [colors.backgroundStart, colors.backgroundMid, colors.backgroundEnd] : [colors.backgroundStart, colors.backgroundMid, colors.backgroundEnd]}
+      style={styles.container}
+    >
+      <View style={styles.innerContainer}>
         <View style={styles.header}>
           <Text style={getTypographyStyle(colors, 'h1')}>Analytics</Text>
         </View>
@@ -97,12 +100,15 @@ const AnalyticsScreen = ({ navigation }) => {
         
         <View style={styles.content}>{renderContent()}</View>
       </View>
-    </GradientBackground>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  innerContainer: {
     flex: 1,
   },
   header: { 

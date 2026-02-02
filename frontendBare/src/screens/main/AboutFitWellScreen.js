@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Linking,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'react-native-linear-gradient';
@@ -28,18 +29,20 @@ const AboutFitWellScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <Text style={[styles.mainTitle, { color: colors.textPrimary }]}>About FitWell</Text>
-
         {/* Logo */}
         <View style={styles.logoContainer}>
-          <View style={[styles.logoCircle, { backgroundColor: colors.accent + '30' }]}>
-            <Icon name="heart-pulse" size={48} color={colors.accent} />
-          </View>
+          <Image 
+            source={require('../../assets/images/fitwell_logo.png')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <Text style={[styles.appName, { color: colors.textPrimary }]}>FitWell</Text>
           <Text style={[styles.tagline, { color: colors.textSecondary }]}>
             Track your progress, stay on top of your health
           </Text>
         </View>
+
+        <Text style={[styles.mainTitle, { color: colors.textPrimary }]}>About FitWell</Text>
 
         {/* App Description */}
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -231,12 +234,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
-  logoCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+  logoImage: {
+    width: 100,
+    height: 100,
     marginBottom: 16,
   },
   appName: {

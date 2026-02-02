@@ -178,7 +178,7 @@ const BodyMetricsTab = () => {
       )}
 
       {/* Weight Section */}
-      <View style={[styles.card, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={styles.cardHeader}>
           <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Weight</Text>
           <TouchableOpacity onPress={() => (isEditingWeight ? handleSaveWeight() : setIsEditingWeight(true))} style={[styles.editBtn, { backgroundColor: isEditingWeight ? colors.success : colors.accent }]}>
@@ -206,7 +206,7 @@ const BodyMetricsTab = () => {
       </View>
 
       {/* Weight Chart */}
-      <View style={[styles.card, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Weight Progress</Text>
         <View style={styles.filterRow}>
           {['1M', '3M', '6M', '1Y', 'All'].map(f => (
@@ -265,7 +265,7 @@ const BodyMetricsTab = () => {
 
       {/* Height & BMI Section */}
       <View style={styles.row}>
-        <View style={[styles.halfCard, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+        <View style={[styles.halfCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <View style={styles.cardHeader}>
             <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Height</Text>
             <TouchableOpacity onPress={() => (isEditingHeight ? handleSaveHeight() : setIsEditingHeight(true))} style={[styles.editBtnSmall, { backgroundColor: isEditingHeight ? colors.success : colors.accent }]}>
@@ -282,7 +282,7 @@ const BodyMetricsTab = () => {
           </View>
         </View>
 
-        <View style={[styles.halfCard, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+        <View style={[styles.halfCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>BMI</Text>
           <View style={styles.bmiGauge}>
             <View style={styles.gaugeContainer}>
@@ -298,7 +298,7 @@ const BodyMetricsTab = () => {
       </View>
 
       {/* Statistics */}
-      <View style={[styles.card, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Statistics</Text>
         {weightData && weightData.length > 0 ? (
           <>
@@ -345,15 +345,10 @@ const styles = StyleSheet.create({
   editBtn: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
   editBtnSmall: { width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
   card: { 
-    padding: 20, 
+    padding: 24, 
     borderRadius: 20, 
-    marginBottom: 16, 
+    marginBottom: 20, 
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   cardTitle: { fontSize: 18, fontWeight: 'bold' },
@@ -373,14 +368,9 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 12, marginBottom: 16 },
   halfCard: { 
     flex: 1, 
-    padding: 20, 
+    padding: 24, 
     borderRadius: 20, 
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
   },
   heightViz: { alignItems: 'center', marginTop: 16 },
   heightText: { fontSize: 24, fontWeight: 'bold', marginTop: 12 },
