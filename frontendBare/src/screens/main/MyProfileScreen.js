@@ -135,7 +135,7 @@ const MyProfileScreen = () => {
         <Text style={[styles.mainTitle, { color: colors.textPrimary }]}>My Profile</Text>
 
         {/* Profile Header */}
-        <View style={[styles.profileHeader, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+        <View style={[styles.profileHeader, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <TouchableOpacity onPress={() => setShowAvatarModal(true)} style={styles.avatarContainer}>
             <View style={[styles.avatarLarge, { backgroundColor: avatars.find(a => a.name === selectedAvatar)?.bg || colors.accent, borderColor: colors.border }]}>
               {selectedAvatar === 'fitwell' ? (
@@ -216,7 +216,7 @@ const MyProfileScreen = () => {
 
         {/* Personal Information */}
         <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Personal Information</Text>
-        <View style={[styles.infoCard, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+        <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <View style={styles.infoRow}>
             <View style={[styles.infoIcon, { backgroundColor: colors.accent + '30' }]}>
               <Icon name="account" size={20} color={colors.accent} />
@@ -287,7 +287,7 @@ const MyProfileScreen = () => {
             </TouchableOpacity>
           )}
         </View>
-        <View style={[styles.goalsCard, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+        <View style={[styles.goalsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <View style={styles.goalRow}>
             <View style={[styles.goalIcon, { backgroundColor: colors.accent + '30' }]}>
               <Icon name="walk" size={24} color={colors.accent} />
@@ -371,7 +371,7 @@ const MyProfileScreen = () => {
 
         {/* Fitness Goal */}
         <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Fitness Goal</Text>
-        <View style={[styles.fitnessCard, { backgroundColor: 'transparent', borderColor: colors.border }]}>
+        <View style={[styles.fitnessCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <View style={[styles.fitnessIconCircle, { backgroundColor: colors.success + '20' }]}>
             <Icon name="target" size={40} color={colors.success} />
           </View>

@@ -16,32 +16,32 @@ const GlassCard = ({ children, style, variant = 'primary', elevation = 'card' })
   const variants = {
     primary: {
       borderRadius: colors.radiusLarge,
-      borderWidth: 3,
-      borderColor: 'rgba(255, 255, 255, 0.75)',
+      borderWidth: 2,
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.75)' : 'rgba(139, 92, 246, 0.3)',
       backgroundColor: colors.card,
       shadowColor: '#FFFFFF',
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.8,
+      shadowOpacity: isDark ? 0.8 : 0.4,
       shadowRadius: 20,
     },
     nested: {
       borderRadius: colors.radiusNested,
-      borderWidth: 2.5,
-      borderColor: 'rgba(255, 255, 255, 0.65)',
+      borderWidth: 1.5,
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.65)' : 'rgba(139, 92, 246, 0.25)',
       backgroundColor: colors.cardGlass,
       shadowColor: '#FFFFFF',
       shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.6,
+      shadowOpacity: isDark ? 0.6 : 0.3,
       shadowRadius: 16,
     },
     strong: {
       borderRadius: colors.radiusMedium,
-      borderWidth: 3,
-      borderColor: 'rgba(255, 255, 255, 0.85)',
+      borderWidth: 2,
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.85)' : 'rgba(139, 92, 246, 0.35)',
       backgroundColor: colors.cardStrong,
       shadowColor: '#FFFFFF',
       shadowOffset: { width: 0, height: 5 },
-      shadowOpacity: 0.9,
+      shadowOpacity: isDark ? 0.9 : 0.5,
       shadowRadius: 24,
     },
   };
@@ -60,17 +60,17 @@ const GlassCard = ({ children, style, variant = 'primary', elevation = 'card' })
     const androidVariants = {
       primary: {
         ...variantStyle,
-        backgroundColor: isDark ? 'rgba(60, 50, 90, 0.85)' : 'rgba(255, 255, 255, 0.55)',
+        backgroundColor: isDark ? 'rgba(60, 50, 90, 0.85)' : 'rgba(255, 255, 255, 0.25)',
         elevation: 16,
       },
       nested: {
         ...variantStyle,
-        backgroundColor: isDark ? 'rgba(60, 50, 90, 0.75)' : 'rgba(255, 255, 255, 0.45)',
+        backgroundColor: isDark ? 'rgba(60, 50, 90, 0.75)' : 'rgba(255, 255, 255, 0.18)',
         elevation: 12,
       },
       strong: {
         ...variantStyle,
-        backgroundColor: isDark ? 'rgba(60, 50, 90, 0.92)' : 'rgba(255, 255, 255, 0.65)',
+        backgroundColor: isDark ? 'rgba(60, 50, 90, 0.92)' : 'rgba(255, 255, 255, 0.35)',
         elevation: 18,
       },
     };
@@ -84,7 +84,7 @@ const GlassCard = ({ children, style, variant = 'primary', elevation = 'card' })
         ]}
         blurType={isDark ? 'dark' : 'light'}
         blurAmount={15}
-        reducedTransparencyFallbackColor={isDark ? 'rgba(60, 50, 90, 0.85)' : 'rgba(255, 255, 255, 0.55)'}
+        reducedTransparencyFallbackColor={isDark ? 'rgba(60, 50, 90, 0.85)' : 'rgba(255, 255, 255, 0.25)'}
       >
         {children}
       </BlurView>
@@ -101,7 +101,7 @@ const GlassCard = ({ children, style, variant = 'primary', elevation = 'card' })
       ]}
       blurType={isDark ? 'dark' : 'light'}
       blurAmount={20}
-      reducedTransparencyFallbackColor={isDark ? 'rgba(60, 50, 90, 0.80)' : 'rgba(255, 255, 255, 0.55)'}
+      reducedTransparencyFallbackColor={isDark ? 'rgba(60, 50, 90, 0.80)' : 'rgba(255, 255, 255, 0.25)'}
     >
       {children}
     </BlurView>

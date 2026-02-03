@@ -321,3 +321,120 @@ def generate_meal_image_endpoint(request):
             "success": False,
             "error": "Failed to generate image"
         }, status=500)
+
+
+# ---------------- RECALCULATE MEAL PLAN BASED ON ACTUAL INTAKE ---------------- #
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def recalculate_meal_plan(request):
+    """
+    Recalculate remaining meal plan based on what user actually ate
+    This provides smart AI adjustments based on user's eating patterns
+    """
+    from .ai_meal_planner import recalculate_meal_plan as ai_recalculate
+    
+    user = request.user
+    today = date.today()
+    
+    # Get user's eating data from the last 7 days
+    last_week = today - timedelta(days=7)
+    meals = MealPlan.objects.filter(user=user, date__gte=last_week, date__lt=today)
+    
+    total_calories = total_protein = total_carbs = total_fat = 0
+    days_with_data = set()
+    
+    for meal in meals:
+        days_with_data.add(meal.date)
+        for item in meal.items.all():
+            tracking = MealItemTracking.objects.filter(meal_item=item).order_by('-timestamp').first()
+            if tracking and tracking.status == "eaten":
+                ratio = tracking.quantity_ratio
+                total_calories += item.calories * ratio
+                total_protein += item.protein * ratio
+                total_carbs += item.carbs * ratio
+                total_fat += item.fat * ratio
+    
+    days_tracked = len(days_with_data)
+    
+    if days_tracked == 0:
+        return Response({
+            "error": "No eating data found in the last 7 days. Please track your meals first."
+        }, status=400)
+    
+    # Calculate user's target calories
+    if not user.height or not user.weight or not user.date_of_birth or not user.gender:
+        return Response({
+            "error": "Please complete your profile with height, weight, date of birth, and gender"
+        }, status=400)
+    
+    from datetime import date as dt
+    age = dt.today().year - user.date_of_birth.year
+    target_calories = recommended_calories(
+        age,
+        user.gender,
+        user.height,
+        user.weight,
+        request.data.get("activity", "moderate")
+    )
+    
+    # Prepare intake data
+    user_intake_data = {
+        'total_calories': total_calories,
+        'total_protein': total_protein,
+        'total_carbs': total_carbs,
+        'total_fat': total_fat,
+        'days_tracked': days_tracked,
+        'deficit_or_surplus': (target_calories * days_tracked) - total_calories
+    }
+    
+    # Get remaining days in current plan
+    future_meals = MealPlan.objects.filter(user=user, date__gte=today)
+    if not future_meals.exists():
+        return Response({
+            "error": "No active meal plan found. Please generate a new meal plan first."
+        }, status=400)
+    
+    # Count unique future dates
+    future_dates = future_meals.values_list('date', flat=True).distinct()
+    remaining_days = len(future_dates)
+    
+    # Delete future meals (we'll replace them with recalculated ones)
+    MealPlan.objects.filter(user=user, date__gte=today).delete()
+    
+    # Get recalculated plan from AI
+    result = ai_recalculate(
+        user_intake_data=user_intake_data,
+        target_calories=target_calories,
+        diet_type=request.data.get("diet_type", "none"),
+        allergies=request.data.get("allergies", ""),
+        goal=user.fitness_goal or "maintain",
+        remaining_days=remaining_days
+    )
+    
+    # Save the new recalculated plan
+    plan = result['meal_plan']
+    for d in range(remaining_days):
+        day_date = today + timedelta(days=d)
+        for meal_type, items in plan[str(d+1)].items():
+            meal = MealPlan.objects.create(user=user, date=day_date, meal_type=meal_type)
+            
+            for food in items:
+                MealItem.objects.create(
+                    meal=meal,
+                    food_name=food["name"],
+                    calories=food["calories"],
+                    protein=food["protein"],
+                    carbs=food["carbs"],
+                    fat=food["fat"]
+                )
+    
+    return Response({
+        "success": True,
+        "message": "Meal plan recalculated based on your eating patterns",
+        "adjustment_note": result['adjustment_note'],
+        "adjusted_calories": result['adjusted_calories'],
+        "original_target": result['original_target'],
+        "days_recalculated": remaining_days,
+        "your_avg_daily_intake": round(total_calories / days_tracked, 1),
+        "days_analyzed": days_tracked
+    })

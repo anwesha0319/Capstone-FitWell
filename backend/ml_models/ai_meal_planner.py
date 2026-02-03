@@ -60,18 +60,26 @@ def generate_meal_plan(calories, diet_type, allergies, goal, days, feedback=None
         """
 
     prompt = f"""
-    Create a {days}-day healthy meal plan.
+    Create a {days}-day healthy meal plan with VARIETY - each day should have DIFFERENT meals.
 
     Daily calories target: {calories}
     Diet type: {diet_type}
-    Allergies: {allergies}
+    Allergies: {allergies if allergies else 'None'}
     Goal: {goal}
 
     {feedback_text}
 
+    CRITICAL REQUIREMENTS:
+    1. Each day MUST have DIFFERENT breakfast, lunch, and dinner
+    2. NO REPEATING meals across days - provide variety
+    3. Mix different cuisines (Indian, Mediterranean, Asian, American, etc.)
+    4. Vary cooking methods (grilled, baked, steamed, raw, etc.)
+    5. Include seasonal and colorful ingredients
+    6. Balance macros: protein, carbs, healthy fats
+    
     Each day must include Breakfast, Lunch, Dinner.
-    Each meal must contain multiple food items with:
-    - name (string)
+    Each meal must contain 2-4 food items with:
+    - name (string) - be specific and appetizing
     - calories (number)
     - protein (number in grams)
     - carbs (number in grams)
@@ -82,16 +90,33 @@ def generate_meal_plan(calories, diet_type, allergies, goal, days, feedback=None
     {{
         "1": {{
             "breakfast": [
-                {{"name": "Oatmeal", "calories": 150, "protein": 5, "carbs": 27, "fat": 3}},
-                {{"name": "Banana", "calories": 105, "protein": 1, "carbs": 27, "fat": 0}}
+                {{"name": "Greek Yogurt with Honey and Almonds", "calories": 180, "protein": 15, "carbs": 20, "fat": 6}},
+                {{"name": "Fresh Strawberries", "calories": 50, "protein": 1, "carbs": 12, "fat": 0}}
             ],
-            "lunch": [...],
-            "dinner": [...]
+            "lunch": [
+                {{"name": "Grilled Chicken Caesar Salad", "calories": 350, "protein": 35, "carbs": 15, "fat": 18}},
+                {{"name": "Whole Grain Roll", "calories": 120, "protein": 4, "carbs": 22, "fat": 2}}
+            ],
+            "dinner": [
+                {{"name": "Baked Salmon with Lemon", "calories": 280, "protein": 35, "carbs": 0, "fat": 15}},
+                {{"name": "Roasted Brussels Sprouts", "calories": 80, "protein": 4, "carbs": 12, "fat": 3}},
+                {{"name": "Quinoa Pilaf", "calories": 180, "protein": 6, "carbs": 30, "fat": 4}}
+            ]
         }},
-        "2": {{...}}
+        "2": {{
+            "breakfast": [
+                {{"name": "Avocado Toast on Sourdough", "calories": 250, "protein": 8, "carbs": 28, "fat": 12}},
+                {{"name": "Poached Eggs", "calories": 140, "protein": 12, "carbs": 1, "fat": 10}}
+            ],
+            "lunch": [...DIFFERENT from day 1...],
+            "dinner": [...DIFFERENT from day 1...]
+        }}
     }}
     
-    IMPORTANT: Return ONLY the JSON object, no additional text or explanation.
+    IMPORTANT: 
+    - Return ONLY the JSON object, no additional text
+    - Make each day's meals UNIQUE and DIFFERENT
+    - Ensure total daily calories are close to {calories} (±100 calories)
     """
 
     try:
@@ -191,3 +216,76 @@ def generate_fallback_plan(calories, diet_type, days):
         }
     
     return plan
+
+
+def recalculate_meal_plan(user_intake_data, target_calories, diet_type, allergies, goal, remaining_days):
+    """
+    Recalculate meal plan based on what user actually ate
+    
+    Args:
+        user_intake_data (dict): What user ate/skipped in recent days
+            Example: {
+                'total_calories': 1800,
+                'total_protein': 80,
+                'total_carbs': 200,
+                'total_fat': 60,
+                'days_tracked': 3,
+                'deficit_or_surplus': -600  # negative = deficit, positive = surplus
+            }
+        target_calories (int): Daily calorie target
+        diet_type (str): Dietary preference
+        allergies (str): Allergies
+        goal (str): Fitness goal
+        remaining_days (int): Days left in the plan
+    
+    Returns:
+        dict: Adjusted meal plan for remaining days
+    """
+    
+    # Calculate adjustments needed
+    avg_daily_intake = user_intake_data['total_calories'] / user_intake_data['days_tracked']
+    daily_deficit = target_calories - avg_daily_intake
+    
+    # Determine adjustment strategy
+    if daily_deficit > 200:
+        adjustment_note = f"You've been eating {int(daily_deficit)} calories below target. Increasing portions slightly."
+        adjusted_calories = target_calories + 100  # Slightly increase to help reach goal
+    elif daily_deficit < -200:
+        adjustment_note = f"You've been eating {int(abs(daily_deficit))} calories above target. Reducing portions slightly."
+        adjusted_calories = target_calories - 100  # Slightly decrease
+    else:
+        adjustment_note = "You're on track! Maintaining current calorie level."
+        adjusted_calories = target_calories
+    
+    # Calculate macro adjustments
+    protein_ratio = user_intake_data['total_protein'] / user_intake_data['total_calories'] if user_intake_data['total_calories'] > 0 else 0.25
+    carbs_ratio = user_intake_data['total_carbs'] / user_intake_data['total_calories'] if user_intake_data['total_calories'] > 0 else 0.50
+    fat_ratio = user_intake_data['total_fat'] / user_intake_data['total_calories'] if user_intake_data['total_calories'] > 0 else 0.25
+    
+    feedback = {
+        'calories': int(avg_daily_intake),
+        'protein': int(user_intake_data['total_protein'] / user_intake_data['days_tracked']),
+        'carbs': int(user_intake_data['total_carbs'] / user_intake_data['days_tracked']),
+        'fat': int(user_intake_data['total_fat'] / user_intake_data['days_tracked']),
+        'adjustment_note': adjustment_note,
+        'protein_ratio': protein_ratio,
+        'carbs_ratio': carbs_ratio,
+        'fat_ratio': fat_ratio
+    }
+    
+    # Generate new plan with adjustments
+    new_plan = generate_meal_plan(
+        calories=adjusted_calories,
+        diet_type=diet_type,
+        allergies=allergies,
+        goal=goal,
+        days=remaining_days,
+        feedback=feedback
+    )
+    
+    return {
+        'meal_plan': new_plan,
+        'adjustment_note': adjustment_note,
+        'adjusted_calories': adjusted_calories,
+        'original_target': target_calories
+    }

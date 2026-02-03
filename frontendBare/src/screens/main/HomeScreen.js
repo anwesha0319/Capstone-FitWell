@@ -172,7 +172,7 @@ const HomeScreen = ({ navigation }) => {
         <TouchableOpacity 
           onPress={() => Alert.alert('Health Connect', 'Sync with Health Connect to import your health data from other apps and devices.\n\nFeatures:\n• Auto-sync steps, sleep, heart rate\n• Import workout data\n• Sync nutrition logs\n• Connect wearable devices\n\nComing soon!')}
         >
-          <GlassCard variant="primary" style={styles.healthConnectButton}>
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.healthConnectRow}>
               <View style={getIconContainerStyle(colors, 'medium', colors.accent)}>
                 <Icon name="sync" size={20} color="#FFFFFF" />
@@ -187,7 +187,7 @@ const HomeScreen = ({ navigation }) => {
               </View>
               <Icon name="chevron-right" size={24} color={colors.accent} />
             </View>
-          </GlassCard>
+          </View>
         </TouchableOpacity>
 
         {/* Today's Stats */}
@@ -195,7 +195,7 @@ const HomeScreen = ({ navigation }) => {
           Today's Stats
         </Text>
 
-        <GlassCard variant="primary">
+        <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
           {/* Running Icon */}
           <View style={[styles.runningIconContainer, { backgroundColor: iconColors.running }]}>
             <Icon name="run" size={80} color="#FFFFFF" />
@@ -229,10 +229,10 @@ const HomeScreen = ({ navigation }) => {
             <Text style={getTypographyStyle(colors, 'label')}>Daily Steps Goal:</Text>
             <Text style={getTypographyStyle(colors, 'bodyMedium')}>{stepsGoal} steps</Text>
           </View>
-        </GlassCard>
+        </View>
 
         {/* Weight Tracking */}
-        <GlassCard variant="primary" style={styles.weightCard}>
+        <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={getTypographyStyle(colors, 'h2')}>Weight Tracking</Text>
           
           <View style={styles.weightContent}>
@@ -266,41 +266,41 @@ const HomeScreen = ({ navigation }) => {
           >
             Set New Goal
           </GlassButton>
-        </GlassCard>
+        </View>
 
         {/* Health Metrics Grid */}
         <View style={styles.metricsGrid}>
-          <GlassCard variant="primary" style={styles.metricCard}>
+          <View style={[styles.metricCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={[styles.metricIconCircle, { backgroundColor: iconColors.heartRate + '20' }]}>
               <Icon name="heart-pulse" size={36} color={iconColors.heartRate} />
             </View>
             <Text style={getTypographyStyle(colors, 'h1')}>{heartRate || 0}</Text>
             <Text style={getTypographyStyle(colors, 'label')}>Heart Rate</Text>
-          </GlassCard>
+          </View>
 
-          <GlassCard variant="primary" style={styles.metricCard}>
+          <View style={[styles.metricCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={[styles.metricIconCircle, { backgroundColor: iconColors.sleep + '20' }]}>
               <Icon name="sleep" size={36} color={iconColors.sleep} />
             </View>
             <Text style={getTypographyStyle(colors, 'h1')}>{sleepHours}h</Text>
             <Text style={getTypographyStyle(colors, 'label')}>Sleep</Text>
-          </GlassCard>
+          </View>
 
-          <GlassCard variant="primary" style={styles.metricCard}>
+          <View style={[styles.metricCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={[styles.metricIconCircle, { backgroundColor: iconColors.water + '20' }]}>
               <Icon name="water" size={36} color={iconColors.water} />
             </View>
             <Text style={getTypographyStyle(colors, 'h1')}>{todayWater.toFixed(1)}L</Text>
             <Text style={getTypographyStyle(colors, 'label')}>Water Intake</Text>
-          </GlassCard>
+          </View>
           
-          <GlassCard variant="primary" style={styles.metricCard}>
+          <View style={[styles.metricCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={[styles.metricIconCircle, { backgroundColor: iconColors.bmi + '20' }]}>
               <Icon name="human-male-height" size={36} color={iconColors.bmi} />
             </View>
             <Text style={getTypographyStyle(colors, 'h1')}>{bmi || 0}</Text>
             <Text style={getTypographyStyle(colors, 'label')}>BMI</Text>
-          </GlassCard>
+          </View>
         </View>
 
         {/* Recommendations */}
@@ -310,33 +310,33 @@ const HomeScreen = ({ navigation }) => {
 
         <View style={styles.recommendationsRow}>
           <TouchableOpacity style={styles.recommendCard} onPress={() => navigation.navigate('DietPlan')}>
-            <GlassCard variant="nested" style={styles.recommendCardInner}>
+            <View style={[styles.recommendCardInner, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={[styles.recommendIconCircle, { backgroundColor: iconColors.diet + '20' }]}>
                 <Icon name="food-apple" size={28} color={iconColors.diet} />
               </View>
               <Text style={[getTypographyStyle(colors, 'bodyMedium'), { fontSize: 13 }]}>Diet Plan</Text>
               <Text style={[getTypographyStyle(colors, 'caption'), { fontSize: 11, textAlign: 'center', marginTop: 4 }]}>AI nutrition</Text>
-            </GlassCard>
+            </View>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.recommendCard} onPress={() => navigation.navigate('WorkoutPlan')}>
-            <GlassCard variant="nested" style={styles.recommendCardInner}>
+            <View style={[styles.recommendCardInner, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={[styles.recommendIconCircle, { backgroundColor: iconColors.workout + '20' }]}>
                 <Icon name="dumbbell" size={28} color={iconColors.workout} />
               </View>
               <Text style={[getTypographyStyle(colors, 'bodyMedium'), { fontSize: 13 }]}>Workout</Text>
               <Text style={[getTypographyStyle(colors, 'caption'), { fontSize: 11, textAlign: 'center', marginTop: 4 }]}>Custom plan</Text>
-            </GlassCard>
+            </View>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.recommendCard} onPress={() => navigation.navigate('MarathonPlan')}>
-            <GlassCard variant="nested" style={styles.recommendCardInner}>
+            <View style={[styles.recommendCardInner, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={[styles.recommendIconCircle, { backgroundColor: iconColors.marathon + '20' }]}>
                 <Icon name="run-fast" size={28} color={iconColors.marathon} />
               </View>
               <Text style={[getTypographyStyle(colors, 'bodyMedium'), { fontSize: 13 }]}>Marathon</Text>
               <Text style={[getTypographyStyle(colors, 'caption'), { fontSize: 11, textAlign: 'center', marginTop: 4 }]}>Race prep</Text>
-            </GlassCard>
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -346,7 +346,7 @@ const HomeScreen = ({ navigation }) => {
         </Text>
 
         <TouchableOpacity onPress={() => Alert.alert('Article', '10 Tips for Better Sleep Quality\n\n1. Maintain consistent sleep schedule\n2. Create relaxing bedtime routine\n3. Keep bedroom cool and dark\n4. Limit screen time before bed\n5. Avoid caffeine after 2 PM\n6. Exercise regularly\n7. Manage stress\n8. Comfortable mattress\n9. Limit daytime naps\n10. Avoid heavy meals before bed')}>
-          <GlassCard variant="primary" style={styles.articleCard}>
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.articleHeader}>
               <View style={[styles.articleIcon, { backgroundColor: '#9C27B0' }]}>
                 <Icon name="sleep" size={24} color="#FFF" />
@@ -361,11 +361,11 @@ const HomeScreen = ({ navigation }) => {
               </View>
             </View>
             <Text style={[getTypographyStyle(colors, 'accent'), { marginTop: 8 }]}>Read More →</Text>
-          </GlassCard>
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => Alert.alert('Article', 'Nutrition Guide for Muscle Building\n\nKey Points:\n• Protein: 1.6-2.2g per kg body weight\n• Eat every 3-4 hours\n• Complex carbs for energy\n• Healthy fats for hormones\n• Stay hydrated\n• Post-workout nutrition\n• Meal prep for consistency\n• Track your macros\n• Quality over quantity\n• Consistency is key')}>
-          <GlassCard variant="primary" style={styles.articleCard}>
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.articleHeader}>
               <View style={[styles.articleIcon, { backgroundColor: '#FF6B6B' }]}>
                 <Icon name="food-steak" size={24} color="#FFF" />
@@ -380,11 +380,11 @@ const HomeScreen = ({ navigation }) => {
               </View>
             </View>
             <Text style={[getTypographyStyle(colors, 'accent'), { marginTop: 8 }]}>Read More →</Text>
-          </GlassCard>
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => Alert.alert('Article', 'Cardio vs Strength Training\n\nCardio Benefits:\n• Heart health\n• Calorie burning\n• Endurance\n• Stress relief\n\nStrength Benefits:\n• Muscle building\n• Bone density\n• Metabolism boost\n• Injury prevention\n\nBest Approach: Combine both for optimal fitness!')}>
-          <GlassCard variant="primary" style={styles.articleCard}>
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.articleHeader}>
               <View style={[styles.articleIcon, { backgroundColor: '#4CAF50' }]}>
                 <Icon name="dumbbell" size={24} color="#FFF" />
@@ -399,11 +399,11 @@ const HomeScreen = ({ navigation }) => {
               </View>
             </View>
             <Text style={[getTypographyStyle(colors, 'accent'), { marginTop: 8 }]}>Read More →</Text>
-          </GlassCard>
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => Alert.alert('Article', 'Hydration: The Forgotten Nutrient\n\nWhy Water Matters:\n• 60% of your body is water\n• Regulates temperature\n• Transports nutrients\n• Removes waste\n• Lubricates joints\n• Improves performance\n\nDaily Goal: 8-10 glasses or 2-3 liters\n\nTip: Drink before you feel thirsty!')}>
-          <GlassCard variant="primary" style={styles.articleCard}>
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.articleHeader}>
               <View style={[styles.articleIcon, { backgroundColor: '#2196F3' }]}>
                 <Icon name="water" size={24} color="#FFF" />
@@ -418,11 +418,11 @@ const HomeScreen = ({ navigation }) => {
               </View>
             </View>
             <Text style={[getTypographyStyle(colors, 'accent'), { marginTop: 8 }]}>Read More →</Text>
-          </GlassCard>
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => Alert.alert('Article', 'Mental Health & Fitness Connection\n\nExercise Benefits:\n• Reduces anxiety & depression\n• Boosts mood & confidence\n• Improves sleep quality\n• Enhances brain function\n• Reduces stress hormones\n• Increases endorphins\n\nRemember: Physical and mental health go hand in hand!')}>
-          <GlassCard variant="primary" style={styles.articleCard}>
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.articleHeader}>
               <View style={[styles.articleIcon, { backgroundColor: '#FF9800' }]}>
                 <Icon name="brain" size={24} color="#FFF" />
@@ -437,7 +437,7 @@ const HomeScreen = ({ navigation }) => {
               </View>
             </View>
             <Text style={[getTypographyStyle(colors, 'accent'), { marginTop: 8 }]}>Read More →</Text>
-          </GlassCard>
+          </View>
         </TouchableOpacity>
 
         {/* Footer */}
@@ -523,6 +523,12 @@ const styles = StyleSheet.create({
   healthConnectButton: {
     marginBottom: 24,
   },
+  card: {
+    padding: 24,
+    borderRadius: 20,
+    marginBottom: 20,
+    borderWidth: 1,
+  },
   healthConnectRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -586,6 +592,8 @@ const styles = StyleSheet.create({
     width: '47%',
     alignItems: 'center',
     paddingVertical: 20,
+    borderRadius: 20,
+    borderWidth: 1,
   },
   metricIconCircle: {
     width: 64,
@@ -607,6 +615,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     gap: 8,
+    borderRadius: 16,
+    borderWidth: 1,
   },
   recommendIconCircle: {
     width: 52,

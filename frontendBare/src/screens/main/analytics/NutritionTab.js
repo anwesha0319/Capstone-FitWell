@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { BarChart } from 'react-native-chart-kit';
 import { useTheme } from '../../../context/ThemeContext';
 import { getGoals } from '../../../utils/storage';
-import { getMealPlan, trackMealItem, saveWaterIntake, getWaterIntake, getHealthData } from '../../../api/client';
+import { getMealPlan, trackMealItem, saveWaterIntake, getWaterIntake, getHealthData, recalculateMealPlan } from '../../../api/client';
 import { getFoodImage } from '../../../services/unsplashService';
 
 const { width } = Dimensions.get('window');
@@ -188,6 +188,31 @@ const NutritionTab = ({ navigation }) => {
     } catch (error) {
       console.error('Failed to track meal:', error);
     }
+  };
+
+  const handleRecalculatePlan = async () => {
+    Alert.alert(
+      'Recalculate Meal Plan',
+      'This will analyze your recent eating patterns and adjust your remaining meal plan accordingly. Continue?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Recalculate',
+          onPress: async () => {
+            try {
+              const result = await recalculateMealPlan();
+              Alert.alert(
+                'Plan Recalculated!',
+                `${result.adjustment_note}\n\nAdjusted calories: ${result.adjusted_calories} (was ${result.original_target})\n\nAnalyzed ${result.days_analyzed} days of data.`,
+                [{ text: 'OK', onPress: () => loadMealPlan() }]
+              );
+            } catch (error) {
+              Alert.alert('Error', error.response?.data?.error || 'Failed to recalculate meal plan');
+            }
+          }
+        }
+      ]
+    );
   };
 
   const handleSaveWater = async () => {
@@ -672,14 +697,24 @@ const NutritionTab = ({ navigation }) => {
             )}
           </View>
 
-          {/* Generate New Plan Button */}
-          <TouchableOpacity
-            style={[styles.generateButton, { backgroundColor: colors.accent }]}
-            onPress={() => navigation.navigate('DietPlan')}
-          >
-            <Icon name="sparkles" size={20} color="#FFF" />
-            <Text style={styles.generateButtonText}>Generate New Plan</Text>
-          </TouchableOpacity>
+          {/* Action Buttons */}
+          <View style={{ flexDirection: 'row', gap: 12, marginTop: 16 }}>
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: colors.accent, flex: 1 }]}
+              onPress={handleRecalculatePlan}
+            >
+              <Icon name="calculator" size={20} color="#FFF" />
+              <Text style={styles.actionButtonText}>Recalculate</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: colors.cardGlass, borderWidth: 1, borderColor: colors.accent, flex: 1 }]}
+              onPress={() => navigation.navigate('DietPlan')}
+            >
+              <Icon name="sparkles" size={20} color={colors.accent} />
+              <Text style={[styles.actionButtonText, { color: colors.accent }]}>New Plan</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
 
@@ -853,6 +888,18 @@ const styles = StyleSheet.create({
   generateButtonText: {
     color: '#FFF',
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 14,
+    borderRadius: 12,
+    gap: 8,
+  },
+  actionButtonText: {
+    fontSize: 15,
     fontWeight: 'bold',
   },
   noPlanText: {

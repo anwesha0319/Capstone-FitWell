@@ -117,6 +117,20 @@ export const trackMealItem = async (mealItemId, status, quantityRatio = 1.0) => 
   }
 };
 
+export const recalculateMealPlan = async (data = {}) => {
+  try {
+    const response = await apiClient.post('/ml/recalculate-meal-plan/', {
+      activity: data.activity || 'moderate',
+      diet_type: data.dietary_preference || 'none',
+      allergies: data.allergies || ''
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Recalculate meal plan error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export const generateWorkoutPlan = async (data) => {
   try {
     const response = await apiClient.post('/ml/workout-plan/', data);
