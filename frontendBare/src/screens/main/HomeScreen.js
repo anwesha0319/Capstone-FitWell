@@ -71,14 +71,7 @@ const HomeScreen = ({ navigation }) => {
         setTodayDistance(todayData.distance || 0);
         setTodayMinutes(todayData.duration || 0);
         setHeartRate(todayData.heart_rate || 0);
-        setCurrentWeight(todayData.weight?.toString() || '75');
         setSleepHours(todayData.sleep_hours?.toString() || '0');
-        
-        // Calculate BMI if height is available
-        const heightInMeters = todayData.height ? todayData.height / 100 : 1.75;
-        const weight = parseFloat(todayData.weight || 75);
-        const bmiValue = weight / (heightInMeters * heightInMeters);
-        setBmi(bmiValue.toFixed(1));
       } else {
         // No data from API, set defaults
         setTodaySteps(0);
@@ -98,15 +91,14 @@ const HomeScreen = ({ navigation }) => {
         } else {
           setTodayWater(0);
         }
-      } catch (error) {
-        console.log('No water data for today');
+      } catch (waterError) {
         setTodayWater(0);
       }
       
-      setWeightGoalState(goal);
+      setWeightGoalState(goal || '');
       setStepsGoal(goals.stepsGoal);
     } catch (error) {
-      console.error('Error loading health data:', error);
+      Alert.alert('Error', 'Failed to load health data. Please check your connection.');
       // Set defaults on error
       setTodaySteps(0);
       setTodayCalories(0);
@@ -122,10 +114,22 @@ const HomeScreen = ({ navigation }) => {
     try {
       const userData = await AsyncStorage.getItem('user');
       if (userData) {
-        setUser(JSON.parse(userData));
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        // Set current weight from user profile
+        if (parsedUser.weight) {
+          setCurrentWeight(parsedUser.weight.toString());
+          
+          // Calculate BMI from user profile data
+          if (parsedUser.height) {
+            const heightInMeters = parsedUser.height / 100;
+            const bmiValue = parsedUser.weight / (heightInMeters * heightInMeters);
+            setBmi(bmiValue.toFixed(1));
+          }
+        }
       }
     } catch (error) {
-      console.error('Failed to load user data:', error);
+      Alert.alert('Error', 'Failed to load user profile data');
     }
   };
 
@@ -244,13 +248,20 @@ const HomeScreen = ({ navigation }) => {
               </View>
             </View>
             
-            {weightGoal && (
+            {weightGoal ? (
               <View style={styles.goalWeightSection}>
                 <Text style={getTypographyStyle(colors, 'label')}>Goal Weight</Text>
                 <View style={styles.weightValueRow}>
                   <Text style={[getTypographyStyle(colors, 'h2'), { fontSize: 24 }]}>{weightGoal}</Text>
                   <Text style={[getTypographyStyle(colors, 'caption'), { marginLeft: 4 }]}>kg</Text>
                 </View>
+              </View>
+            ) : (
+              <View style={styles.goalWeightSection}>
+                <Text style={[getTypographyStyle(colors, 'label'), { color: colors.textTertiary }]}>No Goal Set</Text>
+                <Text style={[getTypographyStyle(colors, 'caption'), { marginTop: 4 }]}>
+                  Set a weight goal to track your progress
+                </Text>
               </View>
             )}
           </View>
@@ -259,12 +270,12 @@ const HomeScreen = ({ navigation }) => {
             variant="primary"
             size="medium"
             onPress={() => {
-              setNewGoalInput(weightGoal);
+              setNewGoalInput(weightGoal || '');
               setShowGoalModal(true);
             }}
             icon={<Icon name="target" size={20} color="#FFF" />}
           >
-            Set New Goal
+            {weightGoal ? 'Update Goal' : 'Set Weight Goal'}
           </GlassButton>
         </View>
 

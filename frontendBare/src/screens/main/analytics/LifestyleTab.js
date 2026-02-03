@@ -298,12 +298,7 @@ const LifestyleTab = () => {
 
       {/* Health Score */}
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <View style={styles.scoreHeader}>
-          <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Health Score</Text>
-          <TouchableOpacity onPress={() => setShowDetails(true)}>
-            <Text style={[styles.viewMore, { color: colors.accent }]}>View More</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Health Score</Text>
         
         <View style={styles.scoreContainer}>
           <View style={styles.circularScore}>
@@ -364,8 +359,8 @@ const LifestyleTab = () => {
         {/* Heart Failure Risk */}
         <View style={[styles.riskCard, { backgroundColor: colors.cardGlass, borderColor: colors.border }]}>
           <View style={styles.riskRow}>
-            <View style={[styles.riskIcon, { backgroundColor: getRiskLevel(heartRisk).color + '20' }]}>
-              <Icon name="heart-pulse" size={28} color={getRiskLevel(heartRisk).color} />
+            <View style={[styles.riskIcon, { backgroundColor: getRiskLevel(heartRisk).color + '30' }]}>
+              <Icon name="heart-pulse" size={32} color={getRiskLevel(heartRisk).color} />
             </View>
             <View style={styles.riskInfo}>
               <Text style={[styles.riskName, { color: colors.textPrimary }]}>Heart Failure Risk</Text>
@@ -390,8 +385,8 @@ const LifestyleTab = () => {
         {/* Liver Failure Risk */}
         <View style={[styles.riskCard, { backgroundColor: colors.cardGlass, borderColor: colors.border }]}>
           <View style={styles.riskRow}>
-            <View style={[styles.riskIcon, { backgroundColor: getRiskLevel(liverRisk).color + '20' }]}>
-              <Icon name="water-outline" size={28} color={getRiskLevel(liverRisk).color} />
+            <View style={[styles.riskIcon, { backgroundColor: getRiskLevel(liverRisk).color + '30' }]}>
+              <Icon name="water-outline" size={32} color={getRiskLevel(liverRisk).color} />
             </View>
             <View style={styles.riskInfo}>
               <Text style={[styles.riskName, { color: colors.textPrimary }]}>Liver Failure Risk</Text>
@@ -416,8 +411,8 @@ const LifestyleTab = () => {
         {/* Kidney Disease Risk */}
         <View style={[styles.riskCard, { backgroundColor: colors.cardGlass, borderColor: colors.border }]}>
           <View style={styles.riskRow}>
-            <View style={[styles.riskIcon, { backgroundColor: getRiskLevel(kidneyRisk).color + '20' }]}>
-              <Icon name="water-check" size={28} color={getRiskLevel(kidneyRisk).color} />
+            <View style={[styles.riskIcon, { backgroundColor: getRiskLevel(kidneyRisk).color + '30' }]}>
+              <Icon name="water-check" size={32} color={getRiskLevel(kidneyRisk).color} />
             </View>
             <View style={styles.riskInfo}>
               <Text style={[styles.riskName, { color: colors.textPrimary }]}>Kidney Disease Risk</Text>
