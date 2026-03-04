@@ -11,7 +11,7 @@ class MealPlan(models.Model):
 
 class MealItem(models.Model):
     meal = models.ForeignKey(MealPlan, on_delete=models.CASCADE, related_name="items")
-    food_name = models.CharField(max_length=100)
+    food_name = models.CharField(max_length=255)  # Increased from 100 to 255
     calories = models.FloatField()
     protein = models.FloatField()
     carbs = models.FloatField()

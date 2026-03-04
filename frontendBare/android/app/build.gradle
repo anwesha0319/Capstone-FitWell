@@ -127,6 +127,9 @@ dependencies {
     implementation project(':react-native-health-connect')
     implementation project(':react-native-vector-icons')
 
+    // Google Play Services for Google Sign-In
+    implementation 'com.google.android.gms:play-services-auth:21.0.0'
+
     // Kotlin stdlib
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22" 
     if (hermesEnabled.toBoolean()) {

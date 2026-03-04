@@ -13,16 +13,11 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'react-native-linear-gradient';
 import GlassButton from '../../components/GlassButton';
+import GoogleFitSync from '../../components/GoogleFitSync';
 import { useTheme } from '../../context/ThemeContext';
 import { getTypographyStyle, getIconContainerStyle } from '../../utils/styleHelpers';
 import { saveWeightGoal, getWeightGoal, getGoals } from '../../utils/storage';
 import { getHealthData, getWaterIntake } from '../../api/client';
-import {
-  initHealthConnect,
-  checkHealthConnectAvailability,
-  requestHealthPermissions,
-  getAllHealthDataToday,
-} from '../../services/healthConnectService';
 
 const HomeScreen = ({ navigation }) => {
   const { colors, isDark } = useTheme();
@@ -41,8 +36,6 @@ const HomeScreen = ({ navigation }) => {
   const [bmi, setBmi] = useState(0);
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [newGoalInput, setNewGoalInput] = useState('');
-  const [healthConnectAvailable, setHealthConnectAvailable] = useState(false);
-  const [healthConnectSyncing, setHealthConnectSyncing] = useState(false);
 
   // Icon colors - darker for light mode
   const getIconColor = (lightColor, darkColor) => isDark ? darkColor : lightColor;
@@ -62,39 +55,7 @@ const HomeScreen = ({ navigation }) => {
     loadUserData();
     loadHealthData();
     updateGreeting();
-    checkHealthConnect();
   }, []);
-
-  const checkHealthConnect = async () => {
-    try {
-      const initialized = await initHealthConnect();
-      
-      if (initialized) {
-        const result = await checkHealthConnectAvailability();
-        setHealthConnectAvailable(result.available);
-      }
-    } catch (error) {
-      // Silently fail - no console logs
-      setHealthConnectAvailable(false);
-    }
-  };
-
-  const handleSyncHealthConnect = async () => {
-    try {
-      setHealthConnectSyncing(true);
-      
-      Alert.alert(
-        'Health Connect Integration',
-        'Health Connect integration is currently being configured.\n\nFor now, please:\n1. Open Health Connect app\n2. Go to App permissions\n3. Find FitWell and grant permissions\n4. Come back and tap sync again',
-        [{ text: 'OK' }]
-      );
-      
-      setHealthConnectSyncing(false);
-    } catch (error) {
-      Alert.alert('Error', error.message || 'Unknown error');
-      setHealthConnectSyncing(false);
-    }
-  };
 
   const loadHealthData = async () => {
     try {
@@ -209,30 +170,8 @@ const HomeScreen = ({ navigation }) => {
           </Text>
         </View>
 
-        {/* Health Connect Sync Button */}
-        <TouchableOpacity 
-          onPress={handleSyncHealthConnect}
-          disabled={healthConnectSyncing}
-        >
-          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={styles.healthConnectRow}>
-              <View style={getIconContainerStyle(colors, 'medium', healthConnectAvailable ? colors.success : colors.accent)}>
-                <Icon name={healthConnectSyncing ? "loading" : "sync"} size={20} color="#FFFFFF" />
-              </View>
-              <View style={styles.healthConnectContent}>
-                <Text style={getTypographyStyle(colors, 'bodyMedium')}>
-                  {healthConnectSyncing ? 'Syncing...' : 'Sync with Health Connect'}
-                </Text>
-                <Text style={getTypographyStyle(colors, 'caption')}>
-                  {healthConnectAvailable 
-                    ? 'Tap to sync your health data' 
-                    : 'Health Connect not available'}
-                </Text>
-              </View>
-              <Icon name="chevron-right" size={24} color={colors.accent} />
-            </View>
-          </View>
-        </TouchableOpacity>
+        {/* Google Fit Sync */}
+        <GoogleFitSync onSyncComplete={loadHealthData} />
 
         {/* Today's Stats */}
         <Text style={[getTypographyStyle(colors, 'h2'), styles.sectionTitle]}>

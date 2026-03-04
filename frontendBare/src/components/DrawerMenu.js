@@ -108,17 +108,17 @@ const DrawerMenu = ({ navigation, onClose }) => {
         {
           icon: 'food-apple',
           label: 'Diet Plan',
-          onPress: () => Alert.alert('Coming Soon', 'AI Diet recommendations will be available soon'),
+          screen: 'DietPlan',
         },
         {
           icon: 'dumbbell',
-          label: 'Workout Generator',
-          onPress: () => Alert.alert('Coming Soon', 'AI Workout generator will be available soon'),
+          label: 'Workout Plan',
+          screen: 'WorkoutPlan',
         },
         {
           icon: 'run-fast',
-          label: 'Marathon Prep',
-          onPress: () => Alert.alert('Coming Soon', 'Marathon preparation will be available soon'),
+          label: 'Marathon Plan',
+          screen: 'MarathonPlan',
         },
       ],
     },
@@ -153,7 +153,9 @@ const DrawerMenu = ({ navigation, onClose }) => {
                 key={itemIndex}
                 style={[styles.menuItem, { backgroundColor: colors.card, borderColor: colors.border }]}
                 onPress={() => {
-                  if (item.onPress) {
+                  if (item.screen) {
+                    navigation.navigate(item.screen);
+                  } else if (item.onPress) {
                     item.onPress();
                   }
                   if (onClose) onClose();

@@ -934,8 +934,8 @@ def get_active_workout_plan(request):
     
     user = request.user
     
-    # Get the most recent workout plan
-    workout = Workout.objects.filter(user=user, workout_type='AI Generated').order_by('-created_at').first()
+    # Get the most recent workout plan (any type)
+    workout = Workout.objects.filter(user=user).exclude(workout_type='Daily Progressive').order_by('-created_at').first()
     
     if not workout:
         return Response({
@@ -1178,8 +1178,8 @@ def get_active_marathon_plan(request):
     
     user = request.user
     
-    # Get the most recent marathon plan
-    marathon = Marathon.objects.filter(user=user, status='training').order_by('-created_at').first()
+    # Get the most recent marathon plan (any status)
+    marathon = Marathon.objects.filter(user=user).order_by('-created_at').first()
     
     if not marathon:
         return Response({

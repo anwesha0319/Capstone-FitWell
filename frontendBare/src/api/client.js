@@ -6,7 +6,7 @@ const API_BASE_URL = 'http://192.168.29.52:8000/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000,
+  timeout: 90000,  // 90 seconds for AI generation endpoints
   headers: {
     'Content-Type': 'application/json',
   },
