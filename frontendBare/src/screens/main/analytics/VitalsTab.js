@@ -5,6 +5,7 @@ import { LineChart } from 'react-native-chart-kit';
 import { useTheme } from '../../../context/ThemeContext';
 import { saveHealthData } from '../../../utils/storage';
 import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getHealthData as apiGetHealthData } from '../../../api/client';
 
 const { width } = Dimensions.get('window');
@@ -37,7 +38,7 @@ const VitalsTab = () => {
           
           const latest = result[0];
           setVitalsRealtime({ 
-            heartRate: latest.heart_rate || null, 
+            heartRate: null, // Will be fetched separately 
             spO2: latest.spo2 || null, 
             cholesterol: latest.cholesterol || null, 
             temperature: latest.temperature || null 

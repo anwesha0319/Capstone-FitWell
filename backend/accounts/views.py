@@ -5,6 +5,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
 from .serializers import SignupSerializer, UserSerializer, ProfileUpdateSerializer
+from .email_utils import send_welcome_email
+import threading
 
 User = get_user_model()
 
@@ -21,9 +23,19 @@ class SignupView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         
+        # Send welcome email in background thread
+        def send_email_in_background():
+            try:
+                send_welcome_email(user)
+            except Exception as e:
+                print(f"Failed to send welcome email: {e}")
+        
+        email_thread = threading.Thread(target=send_email_in_background)
+        email_thread.start()
+        
         return Response({
             'user': UserSerializer(user).data,
-            'message': 'User created successfully'
+            'message': 'User created successfully. Welcome email sent!'
         }, status=status.HTTP_201_CREATED)
 
 class ProfileView(generics.RetrieveUpdateAPIView):

@@ -192,7 +192,16 @@ export const getWaterIntake = async (date = null, days = 7) => {
 export const getHealthData = async (days = 7) => {
   try {
     const response = await apiClient.get(`/health/health-data/?days=${days}`);
-    return response.data;
+    // Handle paginated response from Django REST Framework
+    if (response.data && response.data.results) {
+      return response.data.results;
+    }
+    // Handle direct array response
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    // If it's a single object, wrap it in an array
+    return [response.data];
   } catch (error) {
     console.error('Get health data error:', error.response?.data || error.message);
     throw error;

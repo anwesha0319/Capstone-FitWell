@@ -252,7 +252,7 @@ const ActivityTab = ({ navigation }) => {
               <Icon name="map-marker-distance" size={28} color={iconColors.distance} />
             </View>
             <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Distance</Text>
-            <Text style={[styles.statValue, { color: colors.textPrimary }]}>{distance} km</Text>
+            <Text style={[styles.statValue, { color: colors.textPrimary }]}>{distance.toFixed(2)} km</Text>
           </View>
           <View style={styles.statItem}>
             <View style={[styles.iconCircle, { backgroundColor: iconColors.clock + '20' }]}>

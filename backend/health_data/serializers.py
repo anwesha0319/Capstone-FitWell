@@ -32,8 +32,7 @@ class HealthDataBulkSerializer(serializers.Serializer):
 class DietSerializer(serializers.ModelSerializer):
     class Meta:
         model = Diet
-        fields = ['id', 'age', 'gender', 'height', 'weight', 'activity',
-                  'daily_calories', 'meal_plan', 'created_at', 'updated_at']
+        fields = ['id', 'daily_calories', 'meal_plan', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 class MarathonSerializer(serializers.ModelSerializer):

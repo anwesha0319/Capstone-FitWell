@@ -121,6 +121,10 @@ const SignupScreen = ({ navigation }) => {
             await AsyncStorage.setItem('refresh_token', loginData.refresh);
             await AsyncStorage.setItem('user', JSON.stringify(loginData.user));
             
+            // Show welcome notification
+            const { showWelcomeNotification } = require('../../services/notificationService');
+            showWelcomeNotification(firstName || email.split('@')[0]);
+            
             // Navigate directly to main app
             navigation.replace('Main');
           }

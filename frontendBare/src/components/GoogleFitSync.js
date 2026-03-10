@@ -16,18 +16,13 @@ const GoogleFitSync = ({ onSyncComplete }) => {
 
   const initializeGoogleFit = async () => {
     try {
-      // Configure Google Sign-In (Android-only, no webClientId needed)
-      if (!googleFitService.isConfigured) {
-        googleFitService.configure();
-      }
-
       // Check if already signed in
       const signedIn = await googleFitService.isSignedIn();
       setIsSignedIn(signedIn);
 
       if (signedIn) {
         const user = await googleFitService.getCurrentUser();
-        if (user) {
+        if (user && user.user && user.user.email) {
           setUserEmail(user.user.email);
         }
       }
@@ -41,21 +36,17 @@ const GoogleFitSync = ({ onSyncComplete }) => {
       setSyncing(true);
       setSyncStatus('syncing');
 
-      // Configure if not already configured
-      if (!googleFitService.isConfigured) {
-        googleFitService.configure();
-      }
-
       // Sign in with Google
       const result = await googleFitService.signIn();
 
       if (result.success) {
         setIsSignedIn(true);
-        setUserEmail(result.userInfo.user.email);
+        const email = result.userInfo?.user?.email || result.userInfo?.email || 'Unknown';
+        setUserEmail(email);
         
         Alert.alert(
           'Success!',
-          `Signed in as ${result.userInfo.user.email}. Now you can sync your fitness data.`,
+          `Signed in as ${email}. Now you can sync your fitness data.`,
           [{ text: 'OK' }]
         );
         
@@ -126,7 +117,7 @@ const GoogleFitSync = ({ onSyncComplete }) => {
       if (fitnessData.health_data.length === 0) {
         Alert.alert(
           'No Data Found',
-          'No fitness data found in Google Fit.\n\nTo get data:\n1. Open Google Fit app on your phone\n2. Connect your smartwatch to Google Fit\n3. Wait for data to sync\n4. Try syncing again in FitWell',
+          'No fitness data found in Google Fit.\n\nTo get data:\n1. Open Google Fit app on your phone\n2. Connect your smartwatch (Noise Watch) to NoiseFit app\n3. Enable Google Fit sync in NoiseFit settings\n4. Wait for data to sync from NoiseFit → Google Fit\n5. Try syncing again in FitWell',
           [{ text: 'OK' }]
         );
         setSyncStatus('idle');
@@ -140,11 +131,20 @@ const GoogleFitSync = ({ onSyncComplete }) => {
       await healthAPI.syncHealthData(fitnessData);
 
       setSyncStatus('success');
-      Alert.alert(
-        'Success!',
-        `Synced ${fitnessData.health_data.length} days of fitness data from Google Fit!`,
-        [{ text: 'OK' }]
-      );
+      
+      // Get today's date
+      const today = new Date().toISOString().split('T')[0];
+      const todayData = fitnessData.health_data.find(d => d.date === today);
+      
+      let message = `Synced ${fitnessData.health_data.length} days of fitness data from Google Fit!`;
+      
+      if (todayData) {
+        message += `\n\nToday's Data:\n• Steps: ${todayData.steps}\n• Calories: ${todayData.calories_burned}\n• Distance: ${todayData.distance.toFixed(2)} km\n• Active Minutes: ${todayData.active_minutes}`;
+      } else {
+        message += `\n\n⚠️ Note: Today's data (${today}) not yet available in Google Fit. Data may take time to sync from your smartwatch.`;
+      }
+      
+      Alert.alert('Success!', message, [{ text: 'OK' }]);
 
       // Notify parent component
       if (onSyncComplete) {
@@ -226,67 +226,6 @@ const GoogleFitSync = ({ onSyncComplete }) => {
         {getStatusIcon()}
         <Text style={styles.syncButtonText}>{getStatusText()}</Text>
       </TouchableOpacity>
-
-      {/* User Info and Sign Out */}
-      {isSignedIn && (
-        <View style={styles.userInfoContainer}>
-          <View style={styles.userInfo}>
-            <Icon name="account-circle" size={18} color="#4285F4" />
-            <Text style={styles.userEmail}>{userEmail}</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.signOutButton}
-            onPress={handleSignOut}>
-            <Icon name="logout" size={16} color="#666" />
-            <Text style={styles.signOutText}>Sign Out</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Info Box */}
-      <View style={styles.infoBox}>
-        <Icon name="information" size={16} color="#666" />
-        <Text style={styles.infoText}>
-          {isSignedIn
-            ? 'Syncs steps, heart rate, calories, sleep, and distance from Google Fit. Make sure your smartwatch is syncing to Google Fit app.'
-            : 'Sign in with your Google account to sync fitness data from Google Fit. Your smartwatch data will be automatically imported if connected to Google Fit.'}
-        </Text>
-      </View>
-
-      {/* Features List */}
-      {isSignedIn && (
-        <View style={styles.featuresList}>
-          <Text style={styles.featuresTitle}>Synced Data:</Text>
-          <View style={styles.featureItem}>
-            <Icon name="walk" size={14} color="#4CAF50" />
-            <Text style={styles.featureText}>Steps</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Icon name="heart-pulse" size={14} color="#E91E63" />
-            <Text style={styles.featureText}>Heart Rate</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Icon name="fire" size={14} color="#FF9800" />
-            <Text style={styles.featureText}>Calories</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Icon name="sleep" size={14} color="#9C27B0" />
-            <Text style={styles.featureText}>Sleep</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Icon name="map-marker-distance" size={14} color="#2196F3" />
-            <Text style={styles.featureText}>Distance</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Icon name="water" size={14} color="#00BCD4" />
-            <Text style={styles.featureText}>Blood Pressure</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Icon name="lungs" size={14} color="#FF5722" />
-            <Text style={styles.featureText}>SpO2 (Oxygen)</Text>
-          </View>
-        </View>
-      )}
     </View>
   );
 };

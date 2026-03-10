@@ -81,6 +81,18 @@ const MarathonPlanScreen = ({ navigation }) => {
       
       if (response.success && response.marathon_plan) {
         setMarathonPlan(response.marathon_plan);
+        Alert.alert(
+          'Success',
+          'Marathon training plan generated!',
+          [
+            { text: 'OK', onPress: () => navigation.goBack() },
+          ]
+        );
+        
+        // Automatically navigate back after 2 seconds
+        setTimeout(() => {
+          navigation.goBack();
+        }, 2000);
       } else {
         Alert.alert('Error', 'Failed to generate marathon plan');
       }

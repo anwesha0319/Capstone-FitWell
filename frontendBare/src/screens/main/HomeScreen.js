@@ -36,6 +36,7 @@ const HomeScreen = ({ navigation }) => {
   const [bmi, setBmi] = useState(0);
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [newGoalInput, setNewGoalInput] = useState('');
+  const [showWeeklySummary, setShowWeeklySummary] = useState(false);
 
   // Icon colors - darker for light mode
   const getIconColor = (lightColor, darkColor) => isDark ? darkColor : lightColor;
@@ -58,55 +59,153 @@ const HomeScreen = ({ navigation }) => {
   }, []);
 
   const loadHealthData = async () => {
-    try {
-      // Fetch from database API - silently fail if no data
-      const healthDataArray = await getHealthData(1);
-      const goals = await getGoals();
-      const goal = await getWeightGoal();
-      
-      if (healthDataArray && healthDataArray.length > 0) {
-        const todayData = healthDataArray[0];
-        setTodaySteps(todayData.steps || 0);
-        setTodayCalories(todayData.calories_burned || 0);
-        setTodayDistance(todayData.distance || 0);
-        setTodayMinutes(todayData.duration || 0);
-        setHeartRate(todayData.heart_rate || 0);
-        setSleepHours(todayData.sleep_hours?.toString() || '0');
-      } else {
+      try {
+        // Get auth token
+        const token = await AsyncStorage.getItem('token');
+
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date().toISOString().split('T')[0];
+
+        // Fetch from database API - get last 7 days
+        const healthDataArray = await getHealthData(7);
+
+        const goals = await getGoals();
+        const goal = await getWeightGoal();
+
+        // Find today's data specifically - ONLY show today's data
+        const todayData = healthDataArray.find(item => item.date === today);
+
+        if (todayData) {
+          setTodaySteps(todayData.steps || 0);
+          setTodayCalories(todayData.calories_burned || 0);
+          setTodayDistance(todayData.distance || 0);
+          setTodayMinutes(todayData.active_minutes || 0);
+          setShowWeeklySummary(false);
+        } else if (healthDataArray && healthDataArray.length > 0) {
+          // No data for today - calculate weekly average
+          const totalSteps = healthDataArray.reduce((sum, item) => sum + (item.steps || 0), 0);
+          const totalCalories = healthDataArray.reduce((sum, item) => sum + (item.calories_burned || 0), 0);
+          const totalDistance = healthDataArray.reduce((sum, item) => sum + (item.distance || 0), 0);
+          const totalMinutes = healthDataArray.reduce((sum, item) => sum + (item.active_minutes || 0), 0);
+          
+          const avgSteps = Math.round(totalSteps / healthDataArray.length);
+          const avgCalories = Math.round(totalCalories / healthDataArray.length);
+          const avgDistance = totalDistance / healthDataArray.length;
+          const avgMinutes = Math.round(totalMinutes / healthDataArray.length);
+          
+          setTodaySteps(avgSteps);
+          setTodayCalories(avgCalories);
+          setTodayDistance(avgDistance);
+          setTodayMinutes(avgMinutes);
+          setShowWeeklySummary(true);
+        } else {
+          // No data at all
+          setTodaySteps(0);
+          setTodayCalories(0);
+          setTodayDistance(0);
+          setTodayMinutes(0);
+          setShowWeeklySummary(false);
+        }
+
+        // Fetch heart rate data separately
+        if (token) {
+          try {
+            const response = await fetch(`http://192.168.29.52:8000/api/health/heart-rate/`, {
+              headers: {
+                'Authorization': `Token ${token}`,
+                'Content-Type': 'application/json',
+              },
+            });
+
+            if (response.ok) {
+              const heartRateData = await response.json();
+
+              // Handle paginated response
+              const hrArray = heartRateData.results || heartRateData;
+
+              if (hrArray && hrArray.length > 0) {
+                // Get today's heart rate readings ONLY
+                const todayHR = hrArray.filter(hr => hr.timestamp.startsWith(today));
+
+                if (todayHR.length > 0) {
+                  const avgHR = Math.round(todayHR.reduce((sum, hr) => sum + hr.heart_rate, 0) / todayHR.length);
+                  setHeartRate(avgHR);
+                } else {
+                  setHeartRate(0);
+                }
+              } else {
+                setHeartRate(0);
+              }
+            } else {
+              setHeartRate(0);
+            }
+          } catch (hrError) {
+            setHeartRate(0);
+          }
+
+          // Fetch sleep data separately
+          try {
+            const response = await fetch(`http://192.168.29.52:8000/api/health/sleep/`, {
+              headers: {
+                'Authorization': `Token ${token}`,
+                'Content-Type': 'application/json',
+              },
+            });
+
+            if (response.ok) {
+              const sleepData = await response.json();
+
+              // Handle paginated response
+              const sleepArray = sleepData.results || sleepData;
+
+              if (sleepArray && sleepArray.length > 0) {
+                // Get today's sleep ONLY
+                const todaySleep = sleepArray.find(sleep => sleep.date === today);
+
+                if (todaySleep) {
+                  setSleepHours(todaySleep.sleep_duration.toFixed(1));
+                } else {
+                  setSleepHours('0');
+                }
+              } else {
+                setSleepHours('0');
+              }
+            } else {
+              setSleepHours('0');
+            }
+          } catch (sleepError) {
+            setSleepHours('0');
+          }
+        } else {
+          setHeartRate(0);
+          setSleepHours('0');
+        }
+
+        // Fetch water intake from database
+        try {
+          const waterResult = await getWaterIntake(today);
+          if (waterResult.success) {
+            setTodayWater(waterResult.amount || 0);
+          } else {
+            setTodayWater(0);
+          }
+        } catch (waterError) {
+          setTodayWater(0);
+        }
+
+        setWeightGoalState(goal || '');
+        setStepsGoal(goals.stepsGoal);
+      } catch (error) {
+        // Silently set defaults - no error alert
         setTodaySteps(0);
         setTodayCalories(0);
         setTodayDistance(0);
         setTodayMinutes(0);
+        setTodayWater(0);
         setHeartRate(0);
         setSleepHours('0');
       }
-      
-      // Fetch water intake from database - silently fail
-      try {
-        const today = new Date().toISOString().split('T')[0];
-        const waterResult = await getWaterIntake(today);
-        if (waterResult.success) {
-          setTodayWater(waterResult.amount || 0);
-        } else {
-          setTodayWater(0);
-        }
-      } catch (waterError) {
-        setTodayWater(0);
-      }
-      
-      setWeightGoalState(goal || '');
-      setStepsGoal(goals.stepsGoal);
-    } catch (error) {
-      // Silently set defaults - no error alert
-      setTodaySteps(0);
-      setTodayCalories(0);
-      setTodayDistance(0);
-      setTodayMinutes(0);
-      setTodayWater(0);
-      setHeartRate(0);
-      setSleepHours('0');
-    }
-  };
+    };
 
   const loadUserData = async () => {
     try {
@@ -529,6 +628,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginBottom: 16,
+  },
+  infoBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
   },
   runningIconContainer: {
     width: 120,

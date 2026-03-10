@@ -123,12 +123,16 @@ const DietPlanScreen = ({ navigation }) => {
           'Success',
           `${duration}-day meal plan generated! View it in the Nutrition tab.`,
           [
-            { text: 'View Plan', onPress: () => navigation.goBack() },
-            { text: 'OK', style: 'cancel' },
+            { text: 'OK', onPress: () => navigation.goBack() },
           ]
         );
         setDietPlan({ success: true, duration });
         setActivePlan(null); // Clear active plan state
+        
+        // Automatically navigate back after 2 seconds
+        setTimeout(() => {
+          navigation.goBack();
+        }, 2000);
       } else {
         throw new Error('No plan returned from server');
       }

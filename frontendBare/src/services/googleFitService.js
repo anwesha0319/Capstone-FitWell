@@ -8,6 +8,7 @@ class GoogleFitService {
   constructor() {
     this.isConfigured = false;
     this.accessToken = null;
+    this.isSigningIn = false; // Prevent concurrent sign-in attempts
   }
 
   /**
@@ -46,15 +47,24 @@ class GoogleFitService {
         throw new Error('Google Sign-In not configured. Call configure() first.');
       }
 
-      // Check if already signed in
-      const isSignedIn = await GoogleSignin.isSignedIn();
-      
-      if (isSignedIn) {
-        console.log('Already signed in, getting current user...');
+      // Prevent concurrent sign-in attempts
+      if (this.isSigningIn) {
+        throw new Error('Sign-in already in progress');
+      }
+
+      this.isSigningIn = true;
+
+      // Try to sign in silently first (if already signed in)
+      try {
         const userInfo = await GoogleSignin.signInSilently();
         const tokens = await GoogleSignin.getTokens();
         this.accessToken = tokens.accessToken;
+        console.log('✅ Already signed in, got user info silently');
+        this.isSigningIn = false;
         return { success: true, userInfo, accessToken: this.accessToken };
+      } catch (silentError) {
+        // Not signed in, proceed with regular sign-in
+        console.log('Not signed in yet, showing sign-in prompt...');
       }
 
       // Sign in
@@ -67,8 +77,10 @@ class GoogleFitService {
       console.log('✅ Google Sign-In successful');
       console.log('User:', userInfo.user.email);
       
+      this.isSigningIn = false;
       return { success: true, userInfo, accessToken: this.accessToken };
     } catch (error) {
+      this.isSigningIn = false;
       console.error('❌ Google Sign-In failed:', error);
       
       if (error.code === 'SIGN_IN_CANCELLED') {
@@ -103,7 +115,8 @@ class GoogleFitService {
    */
   async isSignedIn() {
     try {
-      return await GoogleSignin.isSignedIn();
+      const currentUser = await GoogleSignin.getCurrentUser();
+      return currentUser !== null;
     } catch (error) {
       console.error('❌ Failed to check sign-in status:', error);
       return false;
@@ -128,14 +141,17 @@ class GoogleFitService {
    */
   async refreshTokenIfNeeded() {
     try {
+      // If we already have a token, return it
+      if (this.accessToken) {
+        return this.accessToken;
+      }
+      
       const tokens = await GoogleSignin.getTokens();
       this.accessToken = tokens.accessToken;
       return this.accessToken;
     } catch (error) {
       console.error('❌ Failed to refresh token:', error);
-      // Try to sign in again
-      await this.signIn();
-      return this.accessToken;
+      throw new Error('Please sign in again to continue');
     }
   }
 
@@ -192,8 +208,27 @@ class GoogleFitService {
    */
   getTimeRange(days = 7) {
     const endTime = new Date();
+    endTime.setHours(23, 59, 59, 999); // End of today
+    
     const startTime = new Date();
-    startTime.setDate(startTime.getDate() - days);
+    startTime.setDate(startTime.getDate() - days + 1); // Include today
+    startTime.setHours(0, 0, 0, 0); // Start of day
+    
+    return {
+      startTimeMillis: startTime.getTime(),
+      endTimeMillis: endTime.getTime(),
+    };
+  }
+  
+  /**
+   * Get time range for TODAY only
+   */
+  getTodayTimeRange() {
+    const startTime = new Date();
+    startTime.setHours(0, 0, 0, 0); // Start of today
+    
+    const endTime = new Date();
+    endTime.setHours(23, 59, 59, 999); // End of today
     
     return {
       startTimeMillis: startTime.getTime(),
@@ -243,7 +278,7 @@ class GoogleFitService {
       return steps;
     } catch (error) {
       console.error('❌ Failed to fetch steps:', error);
-      throw error;
+      return [];
     }
   }
 
@@ -288,7 +323,7 @@ class GoogleFitService {
       return heartRates;
     } catch (error) {
       console.error('❌ Failed to fetch heart rate:', error);
-      throw error;
+      return [];
     }
   }
 
@@ -334,7 +369,64 @@ class GoogleFitService {
       return calories;
     } catch (error) {
       console.error('❌ Failed to fetch calories:', error);
-      throw error;
+      return [];
+    }
+  }
+
+  /**
+   * Get Move Minutes (active minutes) data from Google Fit
+   */
+  async getMoveMinutes(days = 7) {
+    try {
+      const timeRange = this.getTimeRange(days);
+      
+      const requestBody = {
+        aggregateBy: [{
+          dataTypeName: 'com.google.activity.segment',
+          dataSourceId: 'derived:com.google.activity.segment:com.google.android.gms:merge_activity_segments'
+        }],
+        bucketByTime: { durationMillis: 86400000 }, // 1 day in milliseconds
+        startTimeMillis: timeRange.startTimeMillis,
+        endTimeMillis: timeRange.endTimeMillis,
+      };
+
+      const data = await this.makeRequest('/dataset:aggregate', requestBody);
+      
+      // Parse response
+      const moveMinutes = [];
+      if (data.bucket) {
+        data.bucket.forEach(bucket => {
+          if (bucket.dataset && bucket.dataset[0] && bucket.dataset[0].point) {
+            let dailyMinutes = 0;
+            const date = new Date(parseInt(bucket.startTimeMillis));
+            
+            bucket.dataset[0].point.forEach(point => {
+              const startTime = parseInt(point.startTimeNanos) / 1000000;
+              const endTime = parseInt(point.endTimeNanos) / 1000000;
+              const durationMinutes = (endTime - startTime) / (1000 * 60);
+              
+              // Only count activities that are considered "active" (not still, sleep, etc.)
+              const activityType = point.value[0].intVal;
+              // Activity types: 3=still, 7=walking, 8=running, 1=biking, etc.
+              if (activityType !== 3 && activityType !== 109 && activityType !== 110) {
+                dailyMinutes += durationMinutes;
+              }
+            });
+            
+            moveMinutes.push({
+              date: date.toISOString().split('T')[0],
+              active_minutes: Math.round(dailyMinutes),
+              timestamp: date.toISOString(),
+            });
+          }
+        });
+      }
+      
+      console.log(`✅ Fetched ${moveMinutes.length} days of move minutes data`);
+      return moveMinutes;
+    } catch (error) {
+      console.error('❌ Failed to fetch move minutes:', error);
+      return [];
     }
   }
 
@@ -382,7 +474,7 @@ class GoogleFitService {
       return sleepData;
     } catch (error) {
       console.error('❌ Failed to fetch sleep data:', error);
-      throw error;
+      return [];
     }
   }
 
@@ -521,7 +613,7 @@ class GoogleFitService {
       return distances;
     } catch (error) {
       console.error('❌ Failed to fetch distance:', error);
-      throw error;
+      return [];
     }
   }
 
@@ -532,16 +624,28 @@ class GoogleFitService {
     try {
       console.log(`📊 Fetching ${days} days of fitness data from Google Fit...`);
       
-      // Fetch all data in parallel
-      const [steps, heartRate, calories, sleep, distance, bloodPressure, spo2] = await Promise.all([
-        this.getSteps(days),
-        this.getHeartRate(days),
-        this.getCalories(days),
-        this.getSleepData(days),
-        this.getDistance(days),
-        this.getBloodPressure(days),
-        this.getOxygenSaturation(days),
+      // Get access token ONCE before making any API calls
+      if (!this.accessToken) {
+        console.log('Getting access token...');
+        await this.refreshTokenIfNeeded();
+      }
+      
+      // Fetch all data in parallel, but don't fail if some data types are unavailable
+      const results = await Promise.allSettled([
+        this.getSteps(days).catch(err => { console.log('Steps not available:', err.message); return []; }),
+        this.getHeartRate(days).catch(err => { console.log('Heart rate not available:', err.message); return []; }),
+        this.getCalories(days).catch(err => { console.log('Calories not available:', err.message); return []; }),
+        this.getSleepData(days).catch(err => { console.log('Sleep not available:', err.message); return []; }),
+        this.getDistance(days).catch(err => { console.log('Distance not available:', err.message); return []; }),
+        this.getBloodPressure(days).catch(err => { console.log('Blood pressure not available:', err.message); return []; }),
+        this.getOxygenSaturation(days).catch(err => { console.log('SpO2 not available:', err.message); return []; }),
+        this.getMoveMinutes(days).catch(err => { console.log('Move minutes not available:', err.message); return []; }),
       ]);
+
+      // Extract successful results
+      const [steps, heartRate, calories, sleep, distance, bloodPressure, spo2, moveMinutes] = results.map(
+        result => result.status === 'fulfilled' ? result.value : []
+      );
 
       // Aggregate by date
       const dataByDate = new Map();
@@ -588,6 +692,20 @@ class GoogleFitService {
         dataByDate.get(item.date).distance = item.distance;
       });
 
+      // Add move minutes
+      moveMinutes.forEach(item => {
+        if (!dataByDate.has(item.date)) {
+          dataByDate.set(item.date, {
+            date: item.date,
+            steps: 0,
+            calories_burned: 0,
+            distance: 0,
+            active_minutes: 0,
+          });
+        }
+        dataByDate.get(item.date).active_minutes = item.active_minutes;
+      });
+
       const healthData = Array.from(dataByDate.values()).sort((a, b) => 
         new Date(a.date) - new Date(b.date)
       );
@@ -598,6 +716,16 @@ class GoogleFitService {
       console.log(`  - ${sleep.length} sleep records`);
       console.log(`  - ${bloodPressure.length} blood pressure readings`);
       console.log(`  - ${spo2.length} SpO2 readings`);
+      console.log(`  - ${moveMinutes.length} days of move minutes`);
+      
+      // Log today's data specifically
+      const today = new Date().toISOString().split('T')[0];
+      const todayData = healthData.find(d => d.date === today);
+      if (todayData) {
+        console.log(`📅 TODAY (${today}):`, todayData);
+      } else {
+        console.log(`⚠️ No data for today (${today})`);
+      }
 
       return {
         health_data: healthData,
