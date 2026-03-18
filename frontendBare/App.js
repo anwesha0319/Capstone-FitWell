@@ -3,7 +3,6 @@ import { StatusBar } from 'react-native';
 import { ThemeProvider } from './src/context/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import googleFitService from './src/services/googleFitService';
-import { initializeNotifications } from './src/services/notificationService';
 
 export default function App() {
   useEffect(() => {
@@ -11,11 +10,8 @@ export default function App() {
     try {
       googleFitService.configure();
     } catch (error) {
-      console.error('Failed to configure Google Sign-In:', error);
+      console.error('Error configuring Google Sign-In:', error);
     }
-    
-    // Initialize notifications
-    initializeNotifications();
   }, []);
 
   return (

@@ -1,8 +1,6 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-
-const API_BASE_URL = 'http://192.168.29.52:8000/api';
+import { API_BASE_URL, LOG_NETWORK_REQUESTS } from '../config';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -12,24 +10,55 @@ const apiClient = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token and log requests
 apiClient.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Log network requests in development
+    if (LOG_NETWORK_REQUESTS) {
+      console.log(`🌐 ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+      if (config.data) {
+        console.log('📦 Request data:', config.data);
+      }
+    }
+    
     return config;
   },
   (error) => {
+    if (LOG_NETWORK_REQUESTS) {
+      console.error('❌ Request error:', error);
+    }
     return Promise.reject(error);
   }
 );
 
-// Response interceptor to handle token refresh
+// Response interceptor to handle token refresh and log responses
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Log successful responses in development
+    if (LOG_NETWORK_REQUESTS) {
+      console.log(`✅ ${response.config.method?.toUpperCase()} ${response.config.url} - ${response.status}`);
+    }
+    return response;
+  },
   async (error) => {
+    // Log error responses in development
+    if (LOG_NETWORK_REQUESTS) {
+      if (error.response) {
+        console.error(`❌ ${error.config.method?.toUpperCase()} ${error.config.url} - ${error.response.status}`);
+        console.error('Error response:', error.response.data);
+      } else if (error.request) {
+        console.error(`❌ ${error.config.method?.toUpperCase()} ${error.config.url} - No response`);
+        console.error('No response received. Check if backend is running at:', API_BASE_URL);
+      } else {
+        console.error('❌ Request setup error:', error.message);
+      }
+    }
+
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {

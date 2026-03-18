@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity, Modal, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { LineChart } from 'react-native-chart-kit';
 import { useTheme } from '../../../context/ThemeContext';
 import { getTodayData, getGoals } from '../../../utils/storage';
 import { getHealthData, getActiveWorkoutPlan, trackWorkoutExercise, completeWorkoutPlan, getActiveMarathonPlan, trackMarathonDay, completeMarathonWeek } from '../../../api/client';
@@ -10,7 +9,6 @@ const { width } = Dimensions.get('window');
 
 const ActivityTab = ({ navigation }) => {
   const { colors, isDark } = useTheme();
-  const [timeFilter, setTimeFilter] = useState('Weekly');
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [todaySteps, setTodaySteps] = useState(0);
   const [stepsGoal, setStepsGoal] = useState(10000);
@@ -220,6 +218,11 @@ const ActivityTab = ({ navigation }) => {
   const stepsProgress = todaySteps / stepsGoal;
   const caloriesProgress = caloriesBurned / caloriesTarget;
 
+  // Calculate weekly average
+  const weeklyAverageSteps = computedWeekly && computedWeekly.length > 0 
+    ? Math.round(computedWeekly.reduce((sum, day) => sum + day.steps, 0) / computedWeekly.length)
+    : 0;
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
       <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>My Activity</Text>
@@ -229,119 +232,57 @@ const ActivityTab = ({ navigation }) => {
         </View>
       )}
 
-      {/* Steps Circle Progress */}
-      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Today's Steps</Text>
+      {/* Today's Progress - Single White Container with Purple Border */}
+      <View style={[styles.todaysProgressContainer, { 
+        backgroundColor: '#FFFFFF',
+        borderColor: '#7C4DFF'
+      }]}>
+        {/* Today's Progress Heading */}
+        <Text style={[styles.todaysProgressTitle, { color: '#1A0F2E' }]}>Today's Progress</Text>
+
+        {/* Steps Circle Progress */}
         <View style={styles.circleContainer}>
-          <View style={[styles.progressCircle, { borderColor: '#4CAF50' }]}>
-            <Text style={[styles.stepsValue, { color: colors.textPrimary }]}>{todaySteps}</Text>
-            <Text style={[styles.stepsGoal, { color: colors.textSecondary }]}>of {stepsGoal}</Text>
+          <View style={[styles.progressCircle, { 
+            borderColor: 'rgba(124, 77, 255, 0.2)',
+            backgroundColor: 'rgba(124, 77, 255, 0.05)'
+          }]}>
+            <View style={[styles.progressCircle, { 
+              borderColor: '#7C4DFF',
+              borderWidth: 12 * Math.min(stepsProgress, 1),
+              backgroundColor: 'transparent'
+            }]}>
+              <Text style={[styles.stepsValue, { color: '#1A0F2E' }]}>{todaySteps.toLocaleString()}</Text>
+              <Text style={[styles.stepsGoal, { color: '#666' }]}>Goal: {stepsGoal.toLocaleString()}</Text>
+            </View>
           </View>
         </View>
         
+        {/* Stats Row - Calories, Distance, Duration */}
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <View style={[styles.iconCircle, { backgroundColor: iconColors.fire + '20' }]}>
-              <Icon name="fire" size={28} color={iconColors.fire} />
+            <View style={[styles.iconCircle, { backgroundColor: 'rgba(255, 112, 67, 0.1)' }]}>
+              <Icon name="fire" size={24} color={iconColors.fire} />
             </View>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Calories</Text>
-            <Text style={[styles.statValue, { color: colors.textPrimary }]}>{caloriesBurned}</Text>
+            <Text style={[styles.statValue, { color: '#1A0F2E' }]}>{caloriesBurned} cal</Text>
+            <Text style={{ color: '#666', fontSize: 12 }}>Burned</Text>
           </View>
+          
           <View style={styles.statItem}>
-            <View style={[styles.iconCircle, { backgroundColor: iconColors.distance + '20' }]}>
-              <Icon name="map-marker-distance" size={28} color={iconColors.distance} />
+            <View style={[styles.iconCircle, { backgroundColor: 'rgba(66, 165, 245, 0.1)' }]}>
+              <Icon name="map-marker-distance" size={24} color={iconColors.distance} />
             </View>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Distance</Text>
-            <Text style={[styles.statValue, { color: colors.textPrimary }]}>{distance.toFixed(2)} km</Text>
+            <Text style={[styles.statValue, { color: '#1A0F2E' }]}>{distance.toFixed(2)} km</Text>
+            <Text style={{ color: '#666', fontSize: 12 }}>Distance</Text>
           </View>
+          
           <View style={styles.statItem}>
-            <View style={[styles.iconCircle, { backgroundColor: iconColors.clock + '20' }]}>
-              <Icon name="clock-outline" size={28} color={iconColors.clock} />
+            <View style={[styles.iconCircle, { backgroundColor: 'rgba(102, 187, 106, 0.1)' }]}>
+              <Icon name="clock-outline" size={24} color={iconColors.clock} />
             </View>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Duration</Text>
-            <Text style={[styles.statValue, { color: colors.textPrimary }]}>{duration}</Text>
+            <Text style={[styles.statValue, { color: '#1A0F2E' }]}>{duration}</Text>
+            <Text style={{ color: '#666', fontSize: 12 }}>Duration</Text>
           </View>
         </View>
-      </View>
-
-      {/* Weekly Steps Chart */}
-      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <View style={styles.chartHeaderRow}>
-          <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Progress</Text>
-          <Text style={[styles.timePeriodLabel, { color: colors.textSecondary }]}>
-            {timeFilter === 'Weekly' ? 'This Week' : timeFilter === 'Monthly' ? 'This Month' : 'This Year'}
-          </Text>
-        </View>
-        
-        {/* Time Filter - Moved above chart */}
-        <View style={styles.filterContainerInCard}>
-          {['Weekly', 'Monthly', 'Yearly'].map((filter) => (
-            <TouchableOpacity
-              key={filter}
-              style={[
-                styles.filterButtonSmall,
-                {
-                  backgroundColor: timeFilter === filter ? '#7C4DFF' : colors.cardGlass,
-                  borderColor: timeFilter === filter ? '#7C4DFF' : colors.border,
-                },
-              ]}
-              onPress={() => setTimeFilter(filter)}
-            >
-              <Text style={[styles.filterTextSmall, { color: timeFilter === filter ? '#FFF' : colors.textSecondary }]}>
-                {filter}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {computedWeekly && computedWeekly.length > 0 ? (
-          <>
-            {/* Y-axis label */}
-            <Text style={[styles.yAxisLabel, { color: colors.textSecondary }]}>Steps (count)</Text>
-
-            <LineChart
-              data={{
-                labels: computedWeekly.map(d => d.day),
-                datasets: [{ data: computedWeekly.map(d => d.steps), color: () => '#7C4DFF' }]
-              }}
-              width={width - 80}
-              height={200}
-              yAxisSuffix=""
-              yAxisLabel=""
-              chartConfig={{
-                backgroundColor: isDark ? '#0F2027' : '#FFFFFF',
-                backgroundGradientFrom: isDark ? '#0F2027' : '#FFFFFF',
-                backgroundGradientTo: isDark ? '#0F2027' : '#FFFFFF',
-                decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(124, 77, 255, ${opacity})`,
-                labelColor: () => isDark ? '#E6F1EF' : '#1E2A28',
-                style: { borderRadius: 16 },
-                propsForDots: {
-                  r: '6',
-                  strokeWidth: '3',
-                  stroke: '#7C4DFF',
-                  fill: isDark ? '#0F2027' : '#FFFFFF'
-                },
-                propsForBackgroundLines: {
-                  strokeDasharray: '',
-                  stroke: isDark ? 'rgba(230, 241, 239, 0.1)' : 'rgba(30, 42, 40, 0.1)',
-                }
-              }}
-              bezier
-              style={{ marginVertical: 8, borderRadius: 16 }}
-            />
-            {/* X-axis label */}
-            <Text style={[styles.xAxisLabel, { color: colors.textSecondary }]}>
-              {timeFilter === 'Weekly' ? 'Days of Week' : timeFilter === 'Monthly' ? 'Weeks of Month' : 'Months of Year'}
-            </Text>
-          </>
-        ) : (
-          <View style={[styles.noDataBox, { backgroundColor: colors.info + '10', borderColor: colors.info }]}>
-            <Icon name="chart-line" size={48} color={colors.textTertiary} />
-            <Text style={[styles.noDataText, { color: colors.textSecondary }]}>No activity data available yet</Text>
-            <Text style={[styles.noDataSubtext, { color: colors.textTertiary }]}>Connect Health Connect to track your steps automatically</Text>
-          </View>
-        )}
       </View>
 
       {/* Activity Categories */}
@@ -374,40 +315,7 @@ const ActivityTab = ({ navigation }) => {
         </>
       )}
 
-      {/* Progress Bars */}
-      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Daily Progress</Text>
-        
-        <View style={styles.progressItem}>
-          <View style={styles.progressHeader}>
-            <Text style={[styles.progressLabel, { color: colors.textSecondary }]}>Calories Burned</Text>
-            <Text style={[styles.progressValue, { color: colors.textPrimary }]}>
-              {caloriesBurned} / {caloriesTarget} kcal
-            </Text>
-          </View>
-          <View style={[styles.progressBarBg, { backgroundColor: colors.cardGlass }]}>
-            <View style={[styles.progressBarFill, { width: `${caloriesProgress * 100}%`, backgroundColor: '#FF7043' }]} />
-          </View>
-          <Text style={[styles.progressRemaining, { color: colors.textTertiary }]}>
-            {caloriesTarget - caloriesBurned} kcal remaining
-          </Text>
-        </View>
 
-        <View style={styles.progressItem}>
-          <View style={styles.progressHeader}>
-            <Text style={[styles.progressLabel, { color: colors.textSecondary }]}>Steps</Text>
-            <Text style={[styles.progressValue, { color: colors.textPrimary }]}>
-              {todaySteps} / {stepsGoal} steps
-            </Text>
-          </View>
-          <View style={[styles.progressBarBg, { backgroundColor: colors.cardGlass }]}>
-            <View style={[styles.progressBarFill, { width: `${stepsProgress * 100}%`, backgroundColor: '#4CAF50' }]} />
-          </View>
-          <Text style={[styles.progressRemaining, { color: colors.textTertiary }]}>
-            {stepsGoal - todaySteps} steps remaining
-          </Text>
-        </View>
-      </View>
 
       {/* Training Plans */}
       {navigation && (
@@ -711,9 +619,97 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 20, paddingBottom: 100 },
   sectionTitle: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
-  filterContainerInCard: { flexDirection: 'row', gap: 10, marginBottom: 16 },
-  filterButtonSmall: { flex: 1, paddingVertical: 8, borderRadius: 16, alignItems: 'center', borderWidth: 2 },
-  filterTextSmall: { fontSize: 13, fontWeight: '600' },
+
+  // Today's Progress - Single White Container
+  todaysProgressContainer: {
+    padding: 24,
+    borderRadius: 20,
+    marginBottom: 20,
+    borderWidth: 2,
+    borderStyle: 'solid',
+    alignItems: 'center',
+    shadowColor: '#7C4DFF',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  todaysProgressTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+
+  // Weekly Average Box Styles
+  weeklyAverageBox: {
+    padding: 24,
+    borderRadius: 20,
+    marginBottom: 20,
+    borderWidth: 2,
+    borderStyle: 'solid',
+  },
+  weeklyAverageHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  weeklyAverageText: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  weeklyAverageLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  weeklyAverageValue: {
+    fontSize: 28,
+    fontWeight: 'bold',
+  },
+  weeklyBreakdown: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(124, 77, 255, 0.2)',
+  },
+  weeklyBreakdownTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  weeklyDays: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  weeklyDay: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  weeklyDayLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  weeklyDayValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  connectPrompt: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(124, 77, 255, 0.2)',
+    gap: 8,
+  },
+  connectPromptText: {
+    fontSize: 12,
+    textAlign: 'center',
+  },
+
   circleCard: { 
     padding: 24, 
     borderRadius: 20, 
@@ -742,10 +738,50 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   cardTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
-  chartHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  timePeriodLabel: { fontSize: 13, fontWeight: '600' },
-  yAxisLabel: { fontSize: 12, fontWeight: '600', marginBottom: 8 },
-  xAxisLabel: { fontSize: 12, fontWeight: '600', marginTop: 8, textAlign: 'center' },
+  progressSummary: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  summaryItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  summaryIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  summaryText: {
+    alignItems: 'center',
+  },
+  summaryLabel: {
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  summaryValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  weeklySummary: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+  },
+  weeklyTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  weeklyValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+
   categoriesHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   addButton: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, gap: 6 },
   addButtonText: { color: '#FFF', fontSize: 14, fontWeight: '600' },

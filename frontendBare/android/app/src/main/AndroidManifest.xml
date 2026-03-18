@@ -6,28 +6,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Health Connect runtime permissions for Android 14+ (case-sensitive) -->
-    <uses-permission android:name="android.permission.health.READ_STEPS" />
-    <uses-permission android:name="android.permission.health.READ_DISTANCE" />
-    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
-    <uses-permission android:name="android.permission.health.READ_SLEEP" />
-    <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED" />
-    <uses-permission android:name="android.permission.health.READ_EXERCISE" />
-    <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
-    <uses-permission android:name="android.permission.health.READ_WEIGHT" />
-    <uses-permission android:name="android.permission.health.READ_HEIGHT" />
-    <uses-permission android:name="android.permission.health.READ_BLOOD_PRESSURE" />
-
-    <!-- Declare Health Connect feature (Android 14+ integration) -->
-    <uses-feature
-        android:name="android.software.health_connect"
-        android:required="false" />
-
-    <!-- Query the system provider package on Android 14+ -->
-    <queries>
-        <package android:name="com.google.android.apps.healthdata" />
-    </queries>
-
     <application
         android:name=".MainApplication"
         android:label="@string/app_name"
@@ -37,14 +15,6 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="${usesCleartextTraffic}"
         android:supportsRtl="true">
-
-        <!-- Privacy Policy for Health Connect -->
-        <meta-data
-            android:name="health_permissions_rationale"
-            android:resource="@string/health_permissions_rationale" />
-        <meta-data
-            android:name="privacy_policy"
-            android:resource="@string/privacy_policy_url" />
 
         <activity
             android:name=".MainActivity"
@@ -58,17 +28,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
-        <!-- Health Connect permission rationale activity -->
-        <activity-alias
-            android:name="ViewPermissionUsageActivity"
-            android:exported="true"
-            android:targetActivity=".MainActivity"
-            android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
-            <intent-filter>
-                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity-alias>
+
     </application>
 </manifest>

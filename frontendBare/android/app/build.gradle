@@ -117,18 +117,15 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
     
-    // Health Connect SDK - Latest stable version
-    implementation "androidx.health.connect:connect-client:1.2.0-alpha02"
-    
-    // Required for Jetpack Compose libs used by Health Connect
+    // Required for Jetpack Compose libs
     implementation "androidx.core:core-ktx:1.12.0"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.7.0"
     implementation "androidx.appcompat:appcompat:1.6.1"
-    implementation project(':react-native-health-connect')
     implementation project(':react-native-vector-icons')
 
-    // Google Play Services for Google Sign-In
+    // Google Play Services for Google Sign-In and Google Fit
     implementation 'com.google.android.gms:play-services-auth:21.0.0'
+    implementation 'com.google.android.gms:play-services-fitness:21.1.0'
 
     // Kotlin stdlib
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22" 

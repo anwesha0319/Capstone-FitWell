@@ -14,10 +14,14 @@ class GoogleFitService {
   /**
    * Configure Google Sign-In
    * Call this once when the app starts
-   * For Android-only, no webClientId needed
    */
   configure() {
     try {
+      if (this.isConfigured) {
+        console.log('✅ Google Sign-In already configured');
+        return;
+      }
+
       GoogleSignin.configure({
         scopes: [
           'https://www.googleapis.com/auth/fitness.activity.read',
@@ -28,12 +32,14 @@ class GoogleFitService {
           'https://www.googleapis.com/auth/fitness.blood_pressure.read',
           'https://www.googleapis.com/auth/fitness.oxygen_saturation.read',
         ],
-        offlineAccess: false, // Android-only doesn't need offline access
+        offlineAccess: false,
+        forceCodeForRefreshToken: false,
       });
       this.isConfigured = true;
-      console.log('✅ Google Sign-In configured successfully (Android-only)');
+      console.log('✅ Google Sign-In configured successfully');
     } catch (error) {
       console.error('❌ Google Sign-In configuration failed:', error);
+      this.isConfigured = false;
       throw error;
     }
   }
@@ -44,7 +50,8 @@ class GoogleFitService {
   async signIn() {
     try {
       if (!this.isConfigured) {
-        throw new Error('Google Sign-In not configured. Call configure() first.');
+        console.log('Configuring Google Sign-In...');
+        this.configure();
       }
 
       // Prevent concurrent sign-in attempts
@@ -54,21 +61,24 @@ class GoogleFitService {
 
       this.isSigningIn = true;
 
-      // Try to sign in silently first (if already signed in)
+      // Check if already signed in
       try {
-        const userInfo = await GoogleSignin.signInSilently();
-        const tokens = await GoogleSignin.getTokens();
-        this.accessToken = tokens.accessToken;
-        console.log('✅ Already signed in, got user info silently');
-        this.isSigningIn = false;
-        return { success: true, userInfo, accessToken: this.accessToken };
+        const currentUser = await GoogleSignin.getCurrentUser();
+        if (currentUser) {
+          const tokens = await GoogleSignin.getTokens();
+          this.accessToken = tokens.accessToken;
+          console.log('✅ Already signed in:', currentUser.user.email);
+          this.isSigningIn = false;
+          return { success: true, userInfo: currentUser, accessToken: this.accessToken };
+        }
       } catch (silentError) {
-        // Not signed in, proceed with regular sign-in
-        console.log('Not signed in yet, showing sign-in prompt...');
+        console.log('Not currently signed in, proceeding with sign-in...');
       }
 
+      // Check Play Services
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      
       // Sign in
-      await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       const tokens = await GoogleSignin.getTokens();
       
@@ -88,10 +98,14 @@ class GoogleFitService {
       } else if (error.code === 'IN_PROGRESS') {
         throw new Error('Sign-in already in progress');
       } else if (error.code === 'PLAY_SERVICES_NOT_AVAILABLE') {
-        throw new Error('Google Play Services not available');
+        throw new Error('Google Play Services not available. Please update Google Play Services.');
+      } else if (error.code === '12501') {
+        throw new Error('Sign-in cancelled. Please try again.');
+      } else if (error.code === '10') {
+        throw new Error('Developer error. Please check Google Sign-In configuration.');
       }
       
-      throw error;
+      throw new Error(error.message || 'Failed to sign in with Google');
     }
   }
 

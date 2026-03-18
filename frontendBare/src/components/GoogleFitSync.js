@@ -114,10 +114,10 @@ const GoogleFitSync = ({ onSyncComplete }) => {
       const fitnessData = await googleFitService.getAllFitnessData(7);
 
       // Check if we got any data
-      if (fitnessData.health_data.length === 0) {
+      if (!fitnessData || !fitnessData.health_data || fitnessData.health_data.length === 0) {
         Alert.alert(
           'No Data Found',
-          'No fitness data found in Google Fit.\n\nTo get data:\n1. Open Google Fit app on your phone\n2. Connect your smartwatch (Noise Watch) to NoiseFit app\n3. Enable Google Fit sync in NoiseFit settings\n4. Wait for data to sync from NoiseFit → Google Fit\n5. Try syncing again in FitWell',
+          'No fitness data found in Google Fit for the last 7 days.\n\nMake sure:\n• Your smartwatch is connected to Google Fit\n• Data has synced from your watch to Google Fit\n• You have granted all fitness permissions',
           [{ text: 'OK' }]
         );
         setSyncStatus('idle');
@@ -136,15 +136,15 @@ const GoogleFitSync = ({ onSyncComplete }) => {
       const today = new Date().toISOString().split('T')[0];
       const todayData = fitnessData.health_data.find(d => d.date === today);
       
-      let message = `Synced ${fitnessData.health_data.length} days of fitness data from Google Fit!`;
+      let message = `Successfully synced ${fitnessData.health_data.length} days of fitness data!`;
       
       if (todayData) {
-        message += `\n\nToday's Data:\n• Steps: ${todayData.steps}\n• Calories: ${todayData.calories_burned}\n• Distance: ${todayData.distance.toFixed(2)} km\n• Active Minutes: ${todayData.active_minutes}`;
+        message += `\n\nToday's Data:\n• Steps: ${todayData.steps.toLocaleString()}\n• Calories: ${todayData.calories_burned}\n• Distance: ${todayData.distance.toFixed(2)} km\n• Active Minutes: ${todayData.active_minutes}`;
       } else {
-        message += `\n\n⚠️ Note: Today's data (${today}) not yet available in Google Fit. Data may take time to sync from your smartwatch.`;
+        message += `\n\n⚠️ Note: Today's data not yet available. Data may take time to sync from your smartwatch.`;
       }
       
-      Alert.alert('Success!', message, [{ text: 'OK' }]);
+      Alert.alert('Sync Complete!', message, [{ text: 'OK' }]);
 
       // Notify parent component
       if (onSyncComplete) {
@@ -160,8 +160,21 @@ const GoogleFitSync = ({ onSyncComplete }) => {
       console.error('Sync error:', error);
       setSyncStatus('error');
       
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to sync Google Fit data. Please try again.';
-      Alert.alert('Sync Failed', errorMessage);
+      let errorMessage = 'Failed to sync Google Fit data.';
+      
+      if (error.message?.includes('401') || error.message?.includes('unauthorized')) {
+        errorMessage = 'Session expired. Please sign in again.';
+        setIsSignedIn(false);
+        setUserEmail('');
+      } else if (error.message?.includes('network') || error.message?.includes('Network')) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      Alert.alert('Sync Failed', errorMessage, [{ text: 'OK' }]);
 
       setTimeout(() => {
         setSyncStatus('idle');

@@ -1,7 +1,7 @@
 // Unsplash API Service for Real Food Images
 // Free tier: 50 requests/hour - perfect for meal planning
 
-const UNSPLASH_ACCESS_KEY = 'YOUR_ACCESS_KEY_HERE'; // Get from https://unsplash.com/developers
+const UNSPLASH_ACCESS_KEY = 'Kz8WQ5GeuOZ8xn3YdWPcPb1ODWnjqFdcYxVy1WhspCE'; // Get from https://unsplash.com/developers
 const UNSPLASH_API_URL = 'https://api.unsplash.com';
 
 // Image cache to avoid repeated API calls
@@ -19,7 +19,7 @@ export const getFoodImage = async (foodName) => {
   }
 
   // If no API key, return null (will use icon fallback)
-  if (!UNSPLASH_ACCESS_KEY || UNSPLASH_ACCESS_KEY === 'YOUR_ACCESS_KEY_HERE') {
+  if (!UNSPLASH_ACCESS_KEY || UNSPLASH_ACCESS_KEY === 'Kz8WQ5GeuOZ8xn3YdWPcPb1ODWnjqFdcYxVy1WhspCE') {
     return null;
   }
 
@@ -78,7 +78,7 @@ export const getCombinedMealImage = async (foodItems, mealType = 'meal') => {
   }
 
   // If no API key, return null (will use icon fallback)
-  if (!UNSPLASH_ACCESS_KEY || UNSPLASH_ACCESS_KEY === 'YOUR_ACCESS_KEY_HERE') {
+  if (!UNSPLASH_ACCESS_KEY || UNSPLASH_ACCESS_KEY === 'Kz8WQ5GeuOZ8xn3YdWPcPb1ODWnjqFdcYxVy1WhspCE') {
     return null;
   }
 

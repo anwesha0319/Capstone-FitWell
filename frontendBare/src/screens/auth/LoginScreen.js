@@ -52,7 +52,26 @@ const LoginScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      Alert.alert('Error', error.message || 'Failed to login. Please check your credentials.');
+      
+      let errorMessage = 'Failed to login. ';
+      
+      if (error.message && error.message.includes('Network Error')) {
+        errorMessage += 'Network error. Please check:\n\n';
+        errorMessage += '1. Backend server is running on 192.168.29.52:8000\n';
+        errorMessage += '2. Both devices are on same Wi-Fi network\n';
+        errorMessage += '3. Firewall allows port 8000\n\n';
+        errorMessage += 'To run backend: cd backend && python manage.py runserver 0.0.0.0:8000';
+      } else if (error.response) {
+        // Server responded with error
+        errorMessage = `Server error: ${error.response.status} - ${error.response.data?.detail || error.response.data?.message || 'Unknown error'}`;
+      } else if (error.request) {
+        // Request made but no response
+        errorMessage = 'No response from server. Check if backend is running.';
+      } else {
+        errorMessage = error.message || 'Failed to login. Please check your credentials.';
+      }
+      
+      Alert.alert('Login Error', errorMessage);
     } finally {
       setLoading(false);
     }
